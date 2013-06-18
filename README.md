@@ -1,4 +1,3 @@
 SBP
 ===
-
-git remote set-url origin https://github.com/lucas-ia/SBP.git
+git remote set-url origin git@github.com:lucas-ia/SBP.git
