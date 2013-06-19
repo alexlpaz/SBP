@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_schema.sch
-// Data de publicação: 18/06/2013 18:17:37
-// Usuário publicador: Administrator
+// Data de publicação: 19/06/2013 15:41:58
+// Usuário publicador: ServiceDesk
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
 ////////////////////////////////////////////////////////////////////////
@@ -9,13 +9,23 @@
 #include "../schema.mac"
 #include "../bop.mac"
 
+TABLE Act_Log {
+  z_srl_group	UUID REF ca_contact;
+  z_srl_resocode	INTEGER REF usp_resolution_code;
+  z_srl_transfcode	INTEGER REF ztransfcode;
+}
+
 TABLE usp_contact {
+  z_int_gruposd	INTEGER;// Flag que identifica é de ServiceDesk Feedback
   z_srl_lider	UUID REF ca_contact;
   z_srl_tipo_trat_espec	STRING 12 REF z_tipo_trat_espec;
 }
 
 TABLE Call_Req {
+  z_int_num_redir	INTEGER;
+  z_int_reclass	INTEGER;
   z_int_sla_viol_atend	INTEGER;
+  z_srl_cr	STRING 30 REF Call_Req;
 }
 
 TABLE usp_organization {
@@ -24,6 +34,7 @@ TABLE usp_organization {
 
 TABLE Prob_Category {
   z_srl_servico	UUID REF ca_owned_resource;
+  z_srl_tipo	STRING 10 REF Call_Req_Type;
 }
 
 TABLE serx {
@@ -150,3 +161,15 @@ TABLE z_tipo_trat_espec {
 }
 
 p1 z_tipo_trat_espec -> CURR_PROV z_tipo_trat_espec;
+
+TABLE ztransfcode {
+  id	INTEGER UNIQUE KEY;
+  last_mod_dt	 LOCAL_TIME;
+  last_mod_by	 UUID REF ca_contact;
+  delete_flag	INTEGER REF Active_Boolean_Table;
+  description	STRING 526;
+  sym	STRING 256 UNIQUE;
+  z_int_transf_sd	INTEGER;
+}
+
+p1 ztransfcode -> CURR_PROV ztransfcode;

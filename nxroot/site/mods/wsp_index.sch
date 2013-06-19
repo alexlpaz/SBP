@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_index.sch
-// Data de publicação: 18/06/2013 18:17:37
-// Usuário publicador: Administrator
+// Data de publicação: 19/06/2013 15:41:58
+// Usuário publicador: ServiceDesk
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
 ////////////////////////////////////////////////////////////////////////
@@ -32,5 +32,9 @@ TABLE_INFO z_srv_torre {
 
 TABLE_INFO z_tipo_trat_espec {
   INDEX SORT ASCENDING UNIQUE code ;
+  INDEX SORT ASCENDING UNIQUE sym ;
+}
+
+TABLE_INFO ztransfcode {
   INDEX SORT ASCENDING UNIQUE sym ;
 }

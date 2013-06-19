@@ -1,10 +1,28 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp.mods
-// Data de publicação: 18/06/2013 18:17:36
-// Usuário publicador: Administrator
+// Data de publicação: 19/06/2013 15:41:58
+// Usuário publicador: ServiceDesk
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
 ////////////////////////////////////////////////////////////////////////
+
+////////////////////////////////////////////////////////////////////////
+// Fábrica:   alg
+////////////////////////////////////////////////////////////////////////
+
+OBJECT alg {
+  ATTRIBUTES Act_Log {
+    z_srl_group SREL cnt
+      
+      DISPLAY_NAME "Grupo anterior";
+    z_srl_resocode SREL resocode
+      
+      DISPLAY_NAME "Código de resolução intermediário";
+    z_srl_transfcode SREL ztransfcode
+      
+      DISPLAY_NAME "Código de encaminhamento";
+  };
+};
 
 ////////////////////////////////////////////////////////////////////////
 // Fábrica:   cnt
@@ -12,6 +30,12 @@
 
 OBJECT cnt {
   ATTRIBUTES usp_contact SECONDARY {
+    z_int_gruposd INTEGER // Flag que identifica é de ServiceDesk Feedback
+      
+      DISPLAY_NAME "Grupo do ServiceDesk"
+      {
+      ON_NEW DEFAULT 0;
+      };
     z_srl_lider SREL cnt;
     z_srl_tipo_trat_espec SREL z_tipo_trat_espec;
   };
@@ -23,7 +47,22 @@ OBJECT cnt {
 
 OBJECT cr {
   ATTRIBUTES Call_Req {
+    z_int_num_redir INTEGER
+      
+      DISPLAY_NAME "Quantidade redirecionamento"
+      {
+      ON_NEW DEFAULT 0;
+      };
+    z_int_reclass INTEGER
+      
+      DISPLAY_NAME "Quantidade reclassificações"
+      {
+      ON_NEW DEFAULT 0;
+      };
     z_int_sla_viol_atend INTEGER;
+    z_srl_cr SREL cr
+      
+      DISPLAY_NAME "Chamado relacionado";
   };
 };
 
@@ -44,6 +83,9 @@ OBJECT org {
 OBJECT pcat {
   ATTRIBUTES Prob_Category {
     z_srl_servico SREL nr;
+    z_srl_tipo SREL crt
+      
+      DISPLAY_NAME "Tipo do chamado";
   };
 };
 
@@ -421,5 +463,40 @@ OBJECT z_tipo_trat_espec {
     FUNCTION_GROUP "reference";
     REL_ATTR code;
     COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Fábrica:   ztransfcode (Códigos de encaminhamento)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztransfcode {
+  DISPLAY_NAME "Códigos de encaminhamento";
+
+  ATTRIBUTES ztransfcode {
+    delete_flag SREL actbool
+      REQUIRED
+      {
+      ON_NEW DEFAULT 0;
+      };
+    description STRING 526;
+    sym STRING 256
+      REQUIRED;
+    z_int_transf_sd INTEGER
+      REQUIRED
+      {
+      ON_NEW DEFAULT 0;
+      };
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY ztransfcode {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
   };
 };
