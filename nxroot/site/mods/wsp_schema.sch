@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_schema.sch
-// Data de publicação: 19/06/2013 15:41:58
-// Usuário publicador: ServiceDesk
+// Data de publicação: 20/06/2013 15:21:18
+// Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
 ////////////////////////////////////////////////////////////////////////
@@ -30,6 +30,7 @@ TABLE Call_Req {
 
 TABLE usp_organization {
   z_srl_org_sup	UUID REF ca_organization;
+  z_srl_tipo_org	INTEGER REF z_tipo_org;
 }
 
 TABLE Prob_Category {
@@ -54,6 +55,16 @@ TABLE serx {
   z_str_requisito_nservico	STRING 8000;
 }
 
+TABLE z_cr_cat_org {
+  id	INTEGER UNIQUE KEY;
+  last_mod_dt	 LOCAL_TIME;
+  last_mod_by	 UUID REF ca_contact;
+  z_srl_org	UUID REF ca_organization;
+  z_srl_pcat	STRING 30 REF Prob_Category;
+}
+
+p1 z_cr_cat_org -> CURR_PROV z_cr_cat_org;
+
 TABLE z_cr_slo {
   id	INTEGER UNIQUE KEY;
   last_mod_dt	 LOCAL_TIME;
@@ -74,6 +85,17 @@ TABLE z_cr_slo {
 }
 
 p1 z_cr_slo -> CURR_PROV z_cr_slo;
+
+TABLE z_niv_hier {
+  id	INTEGER UNIQUE KEY;
+  last_mod_dt	 LOCAL_TIME;
+  last_mod_by	 UUID REF ca_contact;
+  delete_flag	INTEGER REF Active_Boolean_Table;
+  description	STRING 512;
+  z_int_nivel	INTEGER UNIQUE S_KEY;
+}
+
+p1 z_niv_hier -> CURR_PROV z_niv_hier;
 
 TABLE z_srv_categoria {
   id	INTEGER UNIQUE KEY;
@@ -146,6 +168,19 @@ TABLE z_srv_torre {
 }
 
 p1 z_srv_torre -> CURR_PROV z_srv_torre;
+
+TABLE z_tipo_org {
+  id	INTEGER UNIQUE KEY;
+  last_mod_dt	 LOCAL_TIME;
+  last_mod_by	 UUID REF ca_contact;
+  code	STRING 30 S_KEY;
+  delete_flag	INTEGER REF Active_Boolean_Table;
+  description	STRING 512;
+  name	STRING 60 UNIQUE;
+  z_srl_niv_hier	INTEGER REF z_niv_hier;
+}
+
+p1 z_tipo_org -> CURR_PROV z_tipo_org;
 
 TABLE z_tipo_trat_espec {
   id	INTEGER UNIQUE KEY;

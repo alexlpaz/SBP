@@ -19,6 +19,7 @@ END
 
 TABLE usp_organization
 ADD z_srl_org_sup
+ADD z_srl_tipo_org
 END
 
 TABLE Prob_Category
@@ -43,6 +44,11 @@ ADD z_str_metodo_cust
 ADD z_str_requisito_nservico
 END
 
+TABLE z_cr_cat_org
+ADD z_srl_org
+ADD z_srl_pcat
+END
+
 TABLE z_cr_slo
 ADD z_dt_violacao_sla
 ADD z_dt_violacao_slo
@@ -57,6 +63,12 @@ ADD z_srl_cr
 ADD z_srl_grupo
 ADD z_srl_responsavel
 ADD z_srl_status
+END
+
+TABLE z_niv_hier
+ADD delete_flag
+ADD description
+ADD z_int_nivel
 END
 
 TABLE z_srv_categoria
@@ -99,6 +111,14 @@ ADD code
 ADD delete_flag
 ADD description
 ADD sym
+END
+
+TABLE z_tipo_org
+ADD code
+ADD delete_flag
+ADD description
+ADD name
+ADD z_srl_niv_hier
 END
 
 TABLE z_tipo_trat_espec
