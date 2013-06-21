@@ -458,6 +458,10 @@ else {
 </PDM_IF>
 <PDM_MACRO name=dtlLookup attr=caused_by_chg>
 <PDM_MACRO name=dtlTextbox hdr="Ticket de sistema externo" attr=external_system_ticket colspan=2 keeptags=yes>
+<PDM_IF "$args.z_srl_cr" != "">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookupReadonly hdr="Ticket dependente" attr=z_srl_cr colspan=4>
+</PDM_IF>
 <PDM_MACRO name=dtlStartExpRow label="Informações resumidas" colspan=4 exp_rows="1,2,3" form_name="detail_cr"> 
 
 if(propSearchConfig.indexOf("summary*") > -1) 

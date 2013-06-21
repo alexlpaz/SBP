@@ -217,6 +217,7 @@ detailRowHdr("Esta categoria é válida para:");
 <PDM_MACRO name=dtlCheckbox hdr="Solicitações" attr=cr_flag off=Não on=Sim>
 <PDM_MACRO name=dtlCheckbox hdr="Incidentes" attr=in_flag off=Não on=Sim>
 <PDM_MACRO name=dtlCheckbox hdr="Problemas" attr=pr_flag off=Não on=Sim>
+<PDM_MACRO name=dtlDropdown hdr="Tipo de ticket" attr=z_srl_tipo lookup=no whereclause="code<>'P'">
 <PDM_MACRO name=dtlEndTable>
 </script>
 

@@ -1,0 +1,44 @@
+<PDM_IF 0>
+z_tickets_dependentes_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Call Req
+INTENT:
+    Display a notebook page for in related request.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag won't be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</script>
+</PDM_IF>
+<html lang="pt_BR"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=z_tickets_dependentes_tab" factory=in>
+<script language="JavaScript" src="$CAisd/scripts/browser.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/msgtext.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/ahdmenus.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/popup.js"></script>
+<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body>
+<PDM_INCLUDE FILE=std_body.htmpl filename="">
+<PDM_FORM NAME="frmDTLRO">
+<script language="JavaScript">
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=tabList brbefore="yes" btntitle="Carregar lista de tickets relacionados." src="OP=SEARCH+FACTORY=z_cr+QBE.EQ.z_srl_cr.id=$dob.id+KEEP.relacionado=1">
+<PDM_MACRO name=dtlEndTable>
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: z_tickets_dependentes_tab.htmpl ASPEN.9 2011/03/31 09:20:21 ralje02 Exp $
+</PDM_IF>

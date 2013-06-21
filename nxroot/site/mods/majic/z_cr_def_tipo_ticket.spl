@@ -1,0 +1,54 @@
+////////////////////////////////////////////////////////////////////////
+// Method:      z_cr_def_tipo_ticket
+// Author:      Alex Paz
+// Created:     Wednesday, June 19, 2013 5:06:16 PM
+// Use Case:    Spec X.X - UC 1.1.1.1
+// Modified by: 
+// Modified:
+//
+// Description: Define o tipo do ticket de acordo com o atributo z_srl_tipo da categoria 
+//
+////////////////////////////////////////////////////////////////////////
+cr::z_cr_def_tipo_ticket(...)
+{
+    
+    
+	int zi, zi_depurar;
+	string zs_metodo;
+	zs_metodo = 'z_cr_def_tipo_ticket - ';
+
+    // Alterar valor zi_depurar parar 1 para debug mode
+    zi_depurar = 0;
+        
+    // Entrada para debug mode
+    if ( zi_depurar==1 ) { 
+        logf(SIGNIFICANT, "============================================================="); 
+        logf(SIGNIFICANT, "%s Inicio - $s", zs_metodo, (string) now());
+        logf(SIGNIFICANT, "%s User - '%s'", zs_metodo, thread_userid());
+        logf(SIGNIFICANT, "%s ARG Count : %d", zs_metodo, argc);
+        for (zi=0; zi<argc; zi+=1) {
+            logf(SIGNIFICANT, "%s ARG #%s : %s", zs_metodo, (string) zi, (string) argv[zi]);          
+        } ;
+        logf(SIGNIFICANT, "============================================================="); 
+    } ;      
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Inicio do codigo
+    string zs_msg, zs_campo, zs_valor, zs_wc, zs_status, zs_persid;
+    object zo_groupLeader, zo_cr, zo_lista, zo_item;
+    int zi_lista, zi_index;
+
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Valor do tipo: %s", zs_metodo, category.z_srl_tipo ); } ;
+    
+    if (is_null(category.z_srl_tipo)) {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nulo", zs_metodo ); } ;
+        type="R";
+    } else {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nao Nulo", zs_metodo ); } ;
+        type=category.z_srl_tipo;
+    } ;
+    
+    // Fim do codigo
+    ///////////////////////////////////////////////////////////////////////////////////////
+	z_bloco_fim(zi_depurar, zs_metodo);
+
+} ;

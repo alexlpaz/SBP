@@ -779,6 +779,19 @@ if ( cfgUserAuth \> 1 && ahdtop.cfgNX_KT == "Yes" && ahdtop.cfgEBRVersion == "SE
 <PDM_IF "$prop.form_name_3" == "edit" && $args.id == 0>
 <PDM_MACRO name=button caption="Usar modelo[*Q]" func="apply_template('frm001', 'SET.customer', 'in')" hotkey_name="Use Template[*Q]" id=btn010>
 </PDM_IF>
+//*************************************
+// Friday, June 21, 2013 11:33:13 AM - Alex Paz 
+// Botões customizados
+<PDM_IF "$args.resolve_date" == "" && "$args.z_srl_cr" == "" && "$prop.form_name_3" != "edit">
+if ( cfgUserAuth \> 1 ) {
+ImgBtnRow();
+<PDM_MACRO name=button caption="Criar ticket relacionado" func="create_new('cr',0,0,0,'PRESET=type:I','PRESET=customer:$args.assignee','PRESET=requested_by:$args.assignee', 'PRESET=z_srl_cr:$args.persistent_id')" hotkey_name="Create Ticket" id=z_cri_ticket>
+ImgBtnEndRow();
+}
+</PDM_IF>
+//*************************************
+// Friday, June 21, 2013 11:35:39 AM - Alex Paz 
+// Fim
 <PDM_MACRO name=dtlStart scroll=true>
 <PDM_IF "$prop.form_name_3" == "edit">
 </script>
@@ -852,6 +865,10 @@ if ( "$args.call_back_date_INT_DATE" != "" || ! _dtl.edit ) {
 </PDM_IF>
 <PDM_MACRO name=dtlLookup attr=caused_by_chg factory=chg>
 <PDM_MACRO name=dtlTextbox hdr="Ticket de sistema externo" attr=external_system_ticket keeptags=yes>
+<PDM_IF "$args.z_srl_cr" != "">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlLookupReadonly hdr="Ticket dependente" attr=z_srl_cr colspan=4>
+</PDM_IF>
 <PDM_MACRO name=dtlStartExpRow label="Informações resumidas" colspan=4 exp_rows="1,2,3" form_name="detail_in"> 
 
 if(propSearchConfig.indexOf("summary*") > -1) 
@@ -927,6 +944,9 @@ if(propSearchConfig.indexOf("description*") > -1)
 <PDM_MACRO name=TAB title="Soluções" file="xx_solnalg_tab.htmpl" id=soln>
 <PDM_MACRO name=startTabGroup title="Relacionamentos">
 <PDM_MACRO name=TAB title="Pai/filho" file="in_relreq_tab.htmpl">
+<PDM_IF "" == "$args.z_srl_cr">
+<PDM_MACRO name=TAB title="Dependências" file="z_tickets_dependentes_tab.htmpl">
+</PDM_IF>
 <PDM_IF "$env.NX_CAEXTWF_ENDPOINT" != "" || "$env.NX_CAWF_PM_URL" != "" && "$env.NX_CAWF_PM_LOCATION" != "">
 <PDM_IF "$args.cawf_procid" != "">
 <PDM_MACRO name=TAB title="Tarefas do fluxo de trabalho" src="OP=INVOKE_SOAP+DAEMON_OP=CallStaticSOAPOperation+CLASSNAME=com.ca.ServicePlus.pdm_rpc.CAWorkflow+ARG0=getWorkflowInstance+ARG1=+ARG2=$args.category.cawf_defid+ARG3=$args.cawf_procid+ARG4=1+ARG5=1+HTMPL=workitems.htmpl">

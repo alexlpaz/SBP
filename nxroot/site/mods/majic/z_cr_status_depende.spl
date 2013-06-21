@@ -1,0 +1,151 @@
+////////////////////////////////////////////////////////////////////////
+// Method:      z_cr_status_depende
+// Author:      Alex Paz
+// Created:     Friday, June 21, 2013 12:41:06 PM
+// Use Case:    Spec "Processos de Gerenciamento de Incidentes (GINC) e Cumprimento de Requisições (CREQ)" - UC 3.1.3.7
+// Modified by: 
+// Modified:
+// Description: Controla ciclo de vida do ticket depende de
+////////////////////////////////////////////////////////////////////////
+cr::z_cr_status_depende(...)
+{  
+	int zi, zi_depurar;
+	string zs_metodo;
+	zs_metodo = 'z_cr_status_depende - ';
+
+    // Alterar valor zi_depurar parar 1 para debug mode
+    zi_depurar = 1;
+        
+    // Entrada para debug mode
+    if ( zi_depurar==1 ) { 
+        logf(SIGNIFICANT, "============================================================="); 
+        logf(SIGNIFICANT, "%s Inicio - $s", zs_metodo, (string) now());
+        logf(SIGNIFICANT, "%s User - '%s'", zs_metodo, thread_userid());
+        logf(SIGNIFICANT, "%s ARG Count : %d", zs_metodo, argc);
+        for (zi=0; zi<argc; zi+=1) {
+            logf(SIGNIFICANT, "%s ARG #%s : %s", zs_metodo, (string) zi, (string) argv[zi]);          
+        } ;
+        logf(SIGNIFICANT, "============================================================="); 
+    } ;      
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Inicio do codigo
+    string zs_msg, zs_campo, zs_valor, zs_wc, zs_status, zs_persid, zs_persid_depende, zs_persid_depende_ant;
+    object zo_groupLeader, zo_cr, zo_lista, zo_item, zo_cr_depende;
+    int zi_lista, zi_index, zi_dependencia_solucionada, zi_alterou;
+    
+    zs_persid=(string) argv[3];
+    zs_persid_depende=(string) argv[6];
+    zs_persid_depende_ant=(string) argv[5];
+    zi_dependencia_solucionada=0;
+    zi_alterou=0;
+    
+    //Instancia o objeto  pelo seu persid e o atribui a variável zo_cr
+    send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, zs_persid);
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao instanciar objeto: %s", zs_metodo,  msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    } ;
+    zo_cr=msg[0];
+    if ( zo_cr.status.active == 0 || zo_cr.status.resolved == 1 ) {
+        zi_dependencia_solucionada=1;        
+    } ;
+    
+    //Instancia o objeto  pelo seu persid e o atribui a variável zo_cr_depende
+    send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, zs_persid_depende);
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao instanciar objeto: %s", zs_metodo,  msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    } ;
+    zo_cr_depende=msg[0];
+    
+    //Cria um group leader
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Instanciando GL", zs_metodo ); } ;
+    send_wait(0, top_object(), "get_co_group");
+    if (msg_error()) {
+        logf(ERROR, "%s Erro ao instanciar GL: '%s'", msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    }
+    zo_groupLeader = msg[0];    
+    
+    if( is_null(zs_persid_depende_ant) && zo_cr_depende.status != "PEND" ) {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Ticket dependente criado... verificando para alterar o status do ticket depende de", zs_metodo ); } ;
+        if ( zo_cr.status.active == 1 ) { 
+            zi_alterou=1;
+            //Faz o checkout do objeto zo_objeto
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro", zs_metodo ); } ;	
+            send_wait(0, zo_groupLeader, "checkout", zo_cr_depende); 
+            if ( msg_error() ) {
+                logf(ERROR, "%s ERRO ao lockar ticket %s: %s", zs_metodo, zo_cr_depende.ref_num, msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);                
+                return;
+            } ;
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo valor PEND no status do depende de", zs_metodo ); } ;
+            send_wait(0, zo_cr_depende, "call_attr", "status", "set_val", "PEND", "SURE_SET");
+            if ( msg_error() ) {
+                logf(ERROR, "%s ERRO ao persistir valor status PEND: %s", zs_metodo,  msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);
+                return;
+            } ;
+        } else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Ticket dependente inativo,nada a alterar", zs_metodo ); } ;
+        } ;
+    } else {
+        if (zi_dependencia_solucionada == 1) { 
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Dependencia solucionada/encerrada, verificando", zs_metodo ); } ;
+            //Efetua uma busca dos objetos cr no banco de dados a partir da clausula definida em zs_wc
+            zs_wc = format("z_srl_cr = '%s' AND persistent_id != '%s' AND status.active = 1 and status.resolved=0",zs_persid_depende, zs_persid );
+            send_wait( 0, top_object(), "call_attr", "cr", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+            if ( msg_error() ) {
+                logf(ERROR, "%s Erro ao definir lista de cr's: %s", zs_metodo,  msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);
+                return;
+            } ;
+            zo_lista = msg[0] ;
+            zi_lista = (int) msg[1] ;   
+            if ( zi_lista == 0 ) {
+                if (zo_cr_depende.status != "WIP" && zo_cr_depende.status.active == 1 && zo_cr_depende.status.resolved == 0 ) {
+                    zi_alterou=1;
+                    //Faz o checkout do objeto zo_objeto
+                    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro", zs_metodo ); } ;	
+                    send_wait(0, zo_groupLeader, "checkout", zo_cr_depende); 
+                    if ( msg_error() ) {
+                        logf(ERROR, "%s ERRO ao lockar ticket %s: %s", zs_metodo, zo_cr_depende.ref_num, msg[0]);
+                        z_bloco_fim(zi_depurar, zs_metodo);                
+                        return;
+                    } ;
+                    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo valor WIP no status do depende de", zs_metodo ); } ;
+                    send_wait(0, zo_cr_depende, "call_attr", "status", "set_val", "WIP", "SURE_SET");
+                    if ( msg_error() ) {
+                        logf(ERROR, "%s ERRO ao persistir status WIP: %s", zs_metodo,  msg[0]);
+                        z_bloco_fim(zi_depurar, zs_metodo);
+                        return;
+                    } ;           
+                } else {
+                    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Depende de com status %s. nada altera...", zs_metodo, zo_cr_depende.status.sym ); } ;
+                } ;
+            } else {
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Temos mais %d depend. ativas no ticket %s", zs_metodo, zi_lista, zo_cr_depende.ref_num ); } ;        
+            } ;
+                      
+        } else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Dependencia nao solucionada/encerrada ou status da depende de ja eh pendente, faz nada", zs_metodo ); } ;
+        } ;
+    } ;
+    if ( zi_alterou == 1 ) { 
+        // Faz o checkin do objeto zo_cr
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo o objeto no banco", zs_metodo ); } ;	
+        send_wait(0, zo_groupLeader, "checkin", zo_cr_depende); 
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao persistir valor: %s", zs_metodo, msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } ;            
+    } ;
+    // Fim do codigo
+    ///////////////////////////////////////////////////////////////////////////////////////
+	z_bloco_fim(zi_depurar, zs_metodo);
+} ;
+
