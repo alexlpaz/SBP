@@ -36,3 +36,10 @@ MODIFY cr PRE_VALIDATE
 MODIFY cr POST_CI
     z_cr_status_depende( persistent_id, z_srl_cr )
     7000 FILTER( (EVENT("INSERT UPDATE")) && z_srl_cr!=NULL && status{} ) ;
+    
+// Author:      Alex Paz - Friday, June 21, 2013 6:07:17 PM 
+// Description: Incrementa o controle ao no ticket reclassificar 
+MODIFY cr POST_CI
+    z_cr_grava_reclass( persistent_id, z_int_reclass )
+    7010 FILTER( (EVENT("UPDATE")) && ( category{} ) && type != "P" ) ;
+
