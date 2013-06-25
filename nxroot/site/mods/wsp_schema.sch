@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_schema.sch
-// Data de publicação: 20/06/2013 15:21:18
-// Usuário publicador: Administrator
+// Data de publicação: 25/06/2013 08:49:36
+// Usuário publicador: ServiceDesk
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
 ////////////////////////////////////////////////////////////////////////
@@ -34,6 +34,7 @@ TABLE usp_organization {
 }
 
 TABLE Prob_Category {
+  z_srl_impact	INTEGER REF Impact;// SRel_Attr_Entry pcat.z_srl_impact
   z_srl_servico	UUID REF ca_owned_resource;
   z_srl_tipo	STRING 10 REF Call_Req_Type;
 }

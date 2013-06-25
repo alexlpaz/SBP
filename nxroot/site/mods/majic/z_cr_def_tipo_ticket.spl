@@ -46,6 +46,11 @@ cr::z_cr_def_tipo_ticket(...)
         if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nao Nulo", zs_metodo ); } ;
         type=category.z_srl_tipo;
     } ;
+    if(!is_null(category.z_srl_impact)) {
+        impact=category.z_srl_impact;
+    } else {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Categoria sem impacto definido", zs_metodo ); } ;
+    }
     
     // Fim do codigo
     ///////////////////////////////////////////////////////////////////////////////////////

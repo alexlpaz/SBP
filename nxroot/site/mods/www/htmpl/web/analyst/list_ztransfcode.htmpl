@@ -1,0 +1,59 @@
+<PDM_IF 0>
+WHEN PRESENTED:
+    When we need to display a list of a particular Factory
+INTENT:
+    Web Screen Painter Template file for list screens
+</PDM_IF>
+<HTML lang="en">
+<HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+var hdrTitle = "Pesquisa códigos de transferência";
+var hdrTitleList = "Lista códigos de transferência";
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("ztransfcodesum.rpt", "ztransfcodedtl.rpt");
+var cfgCanEdit = true;
+</SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
+<SCRIPT LANGUAGE="JavaScript">
+<PDM_MACRO NAME=sfStart factory="ztransfcode">
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfTextbox hdr="Símbolo" attr="sym" size=20>
+<PDM_MACRO name=sfTextbox hdr="Código" attr="code">
+<PDM_MACRO name=sfDropdown hdr="Status do registro" attr="delete_flag">
+<PDM_IF "ztransfcode" : "^z.*$">
+document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
+</PDM_IF>
+<PDM_MACRO NAME=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+  <script language="JavaScript">
+  var msgFoundNone = "Nenhum código de transferência encontrado";
+  var msgFound1 = "1 código de transferência encontrado";
+  var msgFound = "%1 códigos de transferência encontrado(s)";
+  var msgFoundMore = "%1 códigos de transferência localizado(a).  Exibindo de %2 a %3";
+  var msgSelect = "Clique para selecionar o código de transferência";
+  
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsCol hdr="Símbolo" attr="sym" startrow="no" link=yes>
+<PDM_MACRO name=lsCol hdr="Transfere para o SD?" attr="z_int_transf_sd" startrow="no">
+<PDM_MACRO name=lsCol hdr="Descrição" attr="description" escape="JS" startrow="no">
+<PDM_MACRO name=lsCol hdr="Status" attr="delete_flag" startrow="no">
+<PDM_MACRO name=lsEnd>
+  </script>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+
+<PDM_WSP>

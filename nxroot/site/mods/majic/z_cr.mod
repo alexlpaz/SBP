@@ -24,7 +24,7 @@
 // Description: Define o tipo do ticket de acordo com o atributo z_srl_tipo da categoria 
 MODIFY cr PRE_VALIDATE
     z_cr_def_tipo_ticket( category )
-    5000 FILTER( (EVENT("INSERT UPDATE")) && ( category{} ) && type != "P") ;
+    5000 FILTER( (EVENT("INSERT UPDATE")) && category{} && category != NULL && type != "P") ;
 ////////////////////////////////////////////////////////////////////////////////
 // Post Validate - 6xxx
 
@@ -42,4 +42,10 @@ MODIFY cr POST_CI
 MODIFY cr POST_CI
     z_cr_grava_reclass( persistent_id, z_int_reclass )
     7010 FILTER( (EVENT("UPDATE")) && ( category{} ) && type != "P" ) ;
+    
+// Author:      Alex Paz - Monday, June 24, 2013 12:17:36 PM 
+// Description: Replica informações do pai no relacionamento dos filhos 
+MODIFY cr POST_CI
+    z_cr_definicoes_filho( persistent_id, parent )
+    7020 FILTER( (EVENT("INSERT UPDATE")) && ( parent{NULL->} ) && type != "P" ) ;     
 

@@ -1,0 +1,103 @@
+////////////////////////////////////////////////////////////////////////
+// Method:      z_cr_definicoes_filho
+// Author:      Alex Paz
+// Created:     Monday, June 24, 2013 12:20:04 PM
+// Use Case:    Spec X.X - UC 1.1.1.1
+// Modified by: 
+// Modified:
+//
+// Description: Replica informações do pai no relacionamento dos filhos 
+//
+////////////////////////////////////////////////////////////////////////
+cr::z_cr_definicoes_filho(...)
+{    
+	int zi, zi_depurar;
+	string zs_metodo;
+	zs_metodo = 'z_cr_definicoes_filho - ';
+
+    // Alterar valor zi_depurar parar 1 para debug mode
+    zi_depurar = 0;
+        
+    // Entrada para debug mode
+    if ( zi_depurar==1 ) { 
+        logf(SIGNIFICANT, "============================================================="); 
+        logf(SIGNIFICANT, "%s Inicio - $s", zs_metodo, (string) now());
+        logf(SIGNIFICANT, "%s User - '%s'", zs_metodo, thread_userid());
+        logf(SIGNIFICANT, "%s ARG Count : %d", zs_metodo, argc);
+        for (zi=0; zi<argc; zi+=1) {
+            logf(SIGNIFICANT, "%s ARG #%s : %s", zs_metodo, (string) zi, (string) argv[zi]);          
+        } ;
+        logf(SIGNIFICANT, "============================================================="); 
+    } ;      
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Inicio do codigo
+    string zs_msg, zs_analista_pai, zs_grupo_pai, zs_resocode_pai, zs_status_pai, zs_persid, zs_persid_pai;
+    object zo_groupLeader, zo_cr, zo_cr_pai, zo_lista, zo_item;
+    int zi_lista, zi_index;
+    
+    zs_persid=(string)argv[3];
+    zs_persid_pai=(string)argv[6];
+    
+    //Cria um group leader
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Instanciando GL", zs_metodo ); } ;
+    send_wait(0, top_object(), "get_co_group");
+    if (msg_error()) {
+        logf(ERROR, "%s Erro ao instanciar GL: '%s'", msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    }
+    zo_groupLeader = msg[0];
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Group leader: '%s'", zs_metodo, (string) zo_groupLeader ); } ;    
+    
+    //Instancia o objeto  pelo seu persid e o atribui a variável zo_cr
+    send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, zs_persid);
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao instanciar objeto: %s", zs_metodo,  msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    } ;
+    zo_cr=msg[0];
+    
+    //Instancia o objeto  pelo seu persid e o atribui a variável zo_cr_pai
+    send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, zs_persid_pai);
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao instanciar objeto: %s", zs_metodo,  msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    } ;
+    zo_cr_pai=msg[0];
+    send_wait(0, zo_cr_pai, "get_attr_vals",4,"status","assignee","group","resolution_code");
+    zs_status_pai=msg[3];
+    zs_analista_pai=msg[6];
+    zs_grupo_pai=msg[8];
+    zs_resocode_pai=msg[12];
+    
+    //Faz o checkout do objeto zo_objeto
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro", zs_metodo ); } ;	
+    send_wait(0, zo_groupLeader, "checkout", zo_cr); 
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao bloquear ticket %s: %s", zs_metodo, zo_cr.ref_num, msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);                
+        return;
+    } ;
+    send_wait(0, zo_cr, "call_attr", "assignee", "set_val", zs_analista_pai, "SURE_SET");
+    send_wait(0, zo_cr, "call_attr", "group", "set_val", zs_grupo_pai, "SURE_SET");
+    send_wait(0, zo_cr, "call_attr", "resolution_code", "set_val", zs_resocode_pai, "SURE_SET");
+    if (zo_cr_pai.status != "PEND") {
+        send_wait(0, zo_cr, "call_attr", "status", "set_val", zs_status_pai, "SURE_SET");
+    };
+    // Faz o checkin do objeto zo_cr
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo o objeto no banco", zs_metodo ); } ;	
+    send_wait(0, zo_groupLeader, "checkin", zo_cr); 
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao persistir valor: %s", zs_metodo, msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    } ;
+    
+    // Fim do codigo
+    ///////////////////////////////////////////////////////////////////////////////////////
+	z_bloco_fim(zi_depurar, zs_metodo);
+
+} ;
+
