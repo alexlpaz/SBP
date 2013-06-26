@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_schema.sch
-// Data de publicação: 26/06/2013 08:36:13
-// Usuário publicador: ServiceDesk
+// Data de publicação: 26/06/2013 12:07:03
+// Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
 ////////////////////////////////////////////////////////////////////////
@@ -9,34 +9,26 @@
 #include "../schema.mac"
 #include "../bop.mac"
 
-TABLE Act_Log {
-  z_srl_group	UUID REF ca_contact;
-  z_srl_resocode	INTEGER REF usp_resolution_code;
-  z_srl_transfcode	INTEGER REF ztransfcode;
-}
-
 TABLE usp_contact {
-  z_int_gruposd	INTEGER;// Flag que identifica é de ServiceDesk Feedback
   z_srl_lider	UUID REF ca_contact;
   z_srl_tipo_trat_espec	STRING 12 REF z_tipo_trat_espec;
 }
 
 TABLE Call_Req {
-  z_int_num_redir	INTEGER;
-  z_int_reclass	INTEGER;
   z_int_sla_viol_atend	INTEGER;
-  z_srl_cr	STRING 30 REF Call_Req;
+  z_int_slo	INTEGER;
+}
+
+TABLE usp_contact {
+  z_srl_gerente	INTEGER;
 }
 
 TABLE usp_organization {
   z_srl_org_sup	UUID REF ca_organization;
-  z_srl_tipo_org	INTEGER REF z_tipo_org;
 }
 
 TABLE Prob_Category {
-  z_srl_impact	INTEGER REF Impact;// SRel_Attr_Entry pcat.z_srl_impact
   z_srl_servico	UUID REF ca_owned_resource;
-  z_srl_tipo	STRING 10 REF Call_Req_Type;
 }
 
 TABLE serx {
@@ -55,16 +47,6 @@ TABLE serx {
   z_str_metodo_cust	STRING 4000;
   z_str_requisito_nservico	STRING 8000;
 }
-
-TABLE z_cr_cat_org {
-  id	INTEGER UNIQUE KEY;
-  last_mod_dt	 LOCAL_TIME;
-  last_mod_by	 UUID REF ca_contact;
-  z_srl_org	UUID REF ca_organization;
-  z_srl_pcat	STRING 30 REF Prob_Category;
-}
-
-p1 z_cr_cat_org -> CURR_PROV z_cr_cat_org;
 
 TABLE z_cr_slo {
   id	INTEGER UNIQUE KEY;
@@ -86,17 +68,6 @@ TABLE z_cr_slo {
 }
 
 p1 z_cr_slo -> CURR_PROV z_cr_slo;
-
-TABLE z_niv_hier {
-  id	INTEGER UNIQUE KEY;
-  last_mod_dt	 LOCAL_TIME;
-  last_mod_by	 UUID REF ca_contact;
-  delete_flag	INTEGER REF Active_Boolean_Table;
-  description	STRING 512;
-  z_int_nivel	INTEGER UNIQUE S_KEY;
-}
-
-p1 z_niv_hier -> CURR_PROV z_niv_hier;
 
 TABLE z_srv_categoria {
   id	INTEGER UNIQUE KEY;
@@ -170,19 +141,6 @@ TABLE z_srv_torre {
 
 p1 z_srv_torre -> CURR_PROV z_srv_torre;
 
-TABLE z_tipo_org {
-  id	INTEGER UNIQUE KEY;
-  last_mod_dt	 LOCAL_TIME;
-  last_mod_by	 UUID REF ca_contact;
-  code	STRING 30 S_KEY;
-  delete_flag	INTEGER REF Active_Boolean_Table;
-  description	STRING 512;
-  name	STRING 60 UNIQUE;
-  z_srl_niv_hier	INTEGER REF z_niv_hier;
-}
-
-p1 z_tipo_org -> CURR_PROV z_tipo_org;
-
 TABLE z_tipo_trat_espec {
   id	INTEGER UNIQUE KEY;
   last_mod_dt	 LOCAL_TIME;
@@ -197,15 +155,3 @@ TABLE z_tipo_trat_espec {
 }
 
 p1 z_tipo_trat_espec -> CURR_PROV z_tipo_trat_espec;
-
-TABLE ztransfcode {
-  id	INTEGER UNIQUE KEY;
-  last_mod_dt	 LOCAL_TIME;
-  last_mod_by	 UUID REF ca_contact;
-  delete_flag	INTEGER REF Active_Boolean_Table;
-  description	STRING 526;// Desc
-  sym	STRING 256 UNIQUE;
-  z_int_transf_sd	INTEGER;
-}
-
-p1 ztransfcode -> CURR_PROV ztransfcode;
