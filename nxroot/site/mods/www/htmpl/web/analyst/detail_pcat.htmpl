@@ -160,7 +160,7 @@ function ss_include_click ( select_obj )
 <PDM_MACRO name=dtlStartRow>
 <PDM_MACRO name=dtlDropdown hdr="Urgência da área" attr="category_urgency" size=20>
 <PDM_MACRO name=dtlDropdown hdr="Impacto da área" attr="z_srl_impact" size=20>
-<PDM_MACRO name=dtlDropdown hdr="Tipo de ticket" attr=z_srl_tipo lookup=no whereclause="code<>'P'">
+<PDM_MACRO name=dtlDropdown hdr="Tipo de ticket" attr=z_srl_tipo lookup=no make_required=yes>
 <PDM_MACRO name=dtlStartRow>
 <PDM_IF "$prop.form_name_3" == "edit" >
 <PDM_MACRO name=dtlCheckbox hdr="Inclusão de autoatendimento" attr=ss_include evt="onClick='ss_include_click(this)'" off=Não on=Sim>

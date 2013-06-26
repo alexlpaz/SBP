@@ -1,17 +1,17 @@
 ////////////////////////////////////////////////////////////////////////
-// Method:      z_cr_grava_reclass
+// Method:      z_cr_grava_redir
 // Author:      Alex Paz
-// Created:     Friday, June 21, 2013 6:15:35 PM
-// Use Case:    Spec "Processos de Gerenciamento de Incidentes (GINC) e Cumprimento de Requisições (CREQ)" - UC 3.1.3.2
+// Created:     Friday, June 26, 2013 1:49:47 AM
+// Use Case:    Spec "Processos de Gerenciamento de Incidentes (GINC) e Cumprimento de Requisições (CREQ)" - UC 3.1.3.3
 // Modified by: 
 // Modified:
-// Description: Incrementa o controle ao no ticket reclassificar 
+// Description: Incrementa o controle no ticket ao redirecionar para outro grupo
 ////////////////////////////////////////////////////////////////////////
-cr::z_cr_grava_reclass(...)
+cr::z_cr_grava_redir(...)
 {
 	int zi, zi_depurar;
 	string zs_metodo;
-	zs_metodo = 'z_cr_grava_reclass - ';
+	zs_metodo = 'z_cr_grava_redir - ';
 
     // Alterar valor zi_depurar parar 1 para debug mode
     zi_depurar = 0;
@@ -29,15 +29,15 @@ cr::z_cr_grava_reclass(...)
     } ;      
     ///////////////////////////////////////////////////////////////////////////////////////
     // Inicio do codigo
-    string zs_msg, zs_campo, zs_valor, zs_wc, zs_status, zs_persid;
-    object zo_groupLeader, zo_cr, zo_lista, zo_item;
-    int zi_lista, zi_index, zi_qtd_reclass;
+    string zs_persid ;
+    object zo_groupLeader, zo_cr ;
+    int zi_qtd_redir ;
     
     zs_persid = argv[3] ;
     if ( is_null(argv[6]) ) {
-        zi_qtd_reclass=0;
+        zi_qtd_redir=0;
     } else {
-        zi_qtd_reclass=(int) argv[6]+1;
+        zi_qtd_redir=(int) argv[6]+1;
     } ;
     if (is_null(argv[8])) {
         if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Saindo, grupo anterior vazio", zs_metodo ); } ;
@@ -66,7 +66,7 @@ cr::z_cr_grava_reclass(...)
         z_bloco_fim(zi_depurar, zs_metodo);                
         return;
     } ;
-    send_wait(0, zo_cr, "call_attr", "z_int_reclass", "set_val", zi_qtd_reclass, "SURE_SET");
+    send_wait(0, zo_cr, "call_attr", "z_int_num_redir", "set_val", zi_qtd_redir, "SURE_SET");
     if ( msg_error() ) {
         logf(ERROR, "%s ERRO ao persistir valor: %s", zs_metodo,  msg[0]);
         z_bloco_fim(zi_depurar, zs_metodo);

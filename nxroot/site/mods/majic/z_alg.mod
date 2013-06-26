@@ -20,7 +20,11 @@
 
 ////////////////////////////////////////////////////////////////////////////////
 // Pre Validate - 5xxx
-
+// Author:      Alex Paz - Wednesday, June 26, 2013 12:02:46 AM 
+// Description: No momento da transferência do grupo, se código de tranferência é do tipo "tranfere para Servidesk" , valida se Novo Grupo é de ServiceDesk 
+MODIFY alg PRE_VALIDATE
+    z_alg_persiste_transf( )
+    5000 FILTER( (EVENT("INSERT")) && ( type=="TR" && z_srl_transfcode != NULL ) ) ;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Post Validate - 6xxx

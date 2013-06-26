@@ -133,6 +133,17 @@ function tenantOnBlur()
 	</PDM_LIST>
 </PDM_IF>
 
+//Lista Customizada de Grupos
+var resp_name = new Array();
+var resp_uuids = new Array();
+resp_name[0] = "";
+resp_uuids[0] = "";
+<PDM_LIST ESC_STYLE=JS2 prefix=list_grp factory=lrel_svc_grps_svc_pcat where="pcat='$args.category'">
+		resp_name[resp_name.length] = decodeURIComponent('$list_grp.cnt.last_name');
+		resp_uuids[resp_uuids.length] = '$list_grp.cnt.id';
+    //alert("$list_grp.cnt.last_name");
+</PDM_LIST>
+
 function backfill_cnt_event( form_name, base_name, lname, fname, mname,
                              cntID, caller_type )
 {
@@ -432,7 +443,6 @@ if (_dtl && _dtl.next_persid == "")
 <PDM_MACRO name=dtlStartRow>
 <PDM_MACRO name=dtlReadonly hdr="$args.type.sym - Número" attr=ref_num>
 <PDM_MACRO name=dtlReadonly hdr="$args.type.sym - Resumo" attr=summary colspan=2>
-
 <PDM_MACRO name=dtlStartRow>
 <PDM_MACRO name=dtlReadonly hdr="Grupo atual" attr=group>
 <PDM_MACRO name=dtlReadonly hdr="Responsável atual" attr=assignee>
@@ -442,7 +452,6 @@ if (_dtl && _dtl.next_persid == "")
 <PDM_ELSE>
 <PDM_MACRO name=dtlDropdown hdr="Prioridade atual" attr="priority" evt="onBlur=\\\"detailSyncEditForms(this)\\\"">
 </PDM_IF>
-
 <PDM_MACRO name=dtlStartRow>
 <PDM_MACRO name=dtlReadonly hdr="Urgência atual" attr="urgency" id="current_urgency">
 <PDM_MACRO name=dtlReadonly hdr="Impacto atual" attr="impact" id="current_impact">
@@ -451,34 +460,46 @@ if (_dtl && _dtl.next_persid == "")
 <PDM_MACRO name=dtlReadonly hdr="Urgência atual" attr="urgency" id="current_urgency">
 <PDM_MACRO name=dtlReadonly hdr="Prioridade atual" attr=priority>
 </PDM_IF>
-
 <PDM_MACRO name=dtlStartRow>
 <PDM_IF "$args.type" == "I" || "$args.type" == "P">
 <PDM_MACRO name=dtlDropdown hdr="Nova urgência" attr="urgency" evt="onBlur='detailSyncEditForms(this); CapReasonFormUpdates(); manual_modify()'" lookup=no>
 <PDM_MACRO name=dtlDropdown hdr="Novo impacto" attr="impact" evt="onBlur='detailSyncEditForms(this); CapReasonFormUpdates(); manual_modify()'" lookup=no>
 <PDM_ELSE>
-<pdm_if 0>
-    <PDM_MACRO name=dtlDropdown hdr="Nova prioridade" attr=priority evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
-</pdm_if>
 <PDM_MACRO name=dtlDropdown hdr="Nova urgência" attr="urgency" evt="onBlur='detailSyncEditForms(this); CapReasonFormUpdates(); manual_modify()'" lookup=no>
+<!--PDM_MACRO name=dtlDropdown hdr="Nova prioridade" attr=priority evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no-->
+<!--PDM_MACRO name=dtlReadonly hdr="Nova prioridade" attr=priority-->
 </PDM_IF>
 
 var prio_id = _dtl.currID;
 
-<pdm_if 0>
-<PDM_IF "$args.type" == "R" || "$args.type" == "">
-<PDM_IF "$env.NX_REQUIRE_REQUEST_GROUP" == "Yes">
-<PDM_MACRO name=dtlLookup hdr="Novo grupo" attr=group make_required=yes>
-<PDM_ELSE>
-<PDM_MACRO name=dtlLookup hdr="Novo grupo" attr=group>
-</PDM_IF>
-<PDM_ELIF "$args.type" == "I" && "$env.NX_REQUIRE_INCIDENT_GROUP" == "Yes">
-<PDM_MACRO name=dtlLookup hdr="Novo grupo" attr=group make_required=yes>
-<PDM_ELIF "$args.type" == "P" && "$env.NX_REQUIRE_PROBLEM_GROUP" == "Yes">
-<PDM_MACRO name=dtlLookup hdr="Novo grupo" attr=group make_required=yes>
-<PDM_ELSE>
-<PDM_MACRO name=dtlLookup hdr="Novo grupo" attr=group>
-</PDM_IF>
+<PDM_IF "ESC" != "$args.alg.type">
+if ( resp_uuids.length == 1 ) {
+  <PDM_IF "$args.type" == "R" || "$args.type" == "">
+  <PDM_IF "$env.NX_REQUIRE_REQUEST_GROUP" == "Yes">
+  <PDM_MACRO name=dtlLookup hdr="Novo grupo" attr=group make_required=yes>
+  <PDM_ELSE>
+  <PDM_MACRO name=dtlLookup hdr="Novo grupo" attr=group>
+  </PDM_IF>
+  <PDM_ELIF "$args.type" == "I" && "$env.NX_REQUIRE_INCIDENT_GROUP" == "Yes">
+  <PDM_MACRO name=dtlLookup hdr="Novo grupo" attr=group make_required=yes>
+  <PDM_ELIF "$args.type" == "P" && "$env.NX_REQUIRE_PROBLEM_GROUP" == "Yes">
+  <PDM_MACRO name=dtlLookup hdr="Novo grupo" attr=group make_required=yes>
+  <PDM_ELSE>
+  <PDM_MACRO name=dtlLookup hdr="Novo grupo" attr=group>
+  </PDM_IF>
+} else {
+      detailRowHdr("Novo grupo", 1 , 1);
+      var item1 = "<SELECT name=SET.group id=SET.group>" ;
+      for (i = 0; i < resp_uuids.length; i++) {
+        if ( resp_uuids[i] == "$args.group" ) {
+          item1 = item1 + '<OPTION SELECTED VALUE="' + resp_uuids[i] + '">'+resp_name[i]+'</OPTION>';
+        } else {
+          item1 = item1 + '<OPTION VALUE="' + resp_uuids[i] + '">'+resp_name[i]+'</OPTION>';
+        } ;
+      } ;
+      item1 = item1 + '</SELECT></TD>' ;
+      detailSetRowData(item1);
+};
 <PDM_IF "$args.type" == "R" || "$args.type" == "">
 <PDM_IF "$env.NX_REQUIRE_REQUEST_ASSIGNEE" == "Yes">
 <PDM_MACRO name=dtlLookup hdr="Novo responsável" attr=assignee make_required=yes>
@@ -492,11 +513,16 @@ var prio_id = _dtl.currID;
 <PDM_ELSE>
 <PDM_MACRO name=dtlLookup hdr="Novo responsável" attr=assignee>
 </PDM_IF>
-</pdm_if>
+</PDM_IF>
 var assignee_id = _dtl.currID;
 
 
-
+<PDM_IF "ESC" != "$args.alg.type">
+<PDM_MACRO name=dtlStartRow>
+<PDM_MACRO name=dtlDropdown hdr="Código de encaminhamento" attr=alg.z_srl_transfcode lookup=no factory=ztransfcode make_required=yes>
+<PDM_MACRO name=dtlHier hdr="Código de resolução intermediário" attr=alg.z_srl_resocode factory=resocode make_required=yes colspan=2>
+docWriteln("<input type=hidden name=SET.alg.z_srl_group value='$args.group'>");
+</PDM_IF>
 <PDM_MACRO name=dtlStartRow>
 <PDM_MACRO name=dtlTextbox hdr="Tempo gasto" attr=alg.time_spent evt="onBlur='validate_duration_ts(this)'" maxlength=100>
 <PDM_MACRO name=dtlDate hdr="Data da atividade" attr=alg.time_stamp>
@@ -505,7 +531,7 @@ var assignee_id = _dtl.currID;
 <PDM_MACRO name=dtlCheckbox hdr="Interno?" attr=alg.internal>
 </PDM_IF>
 <PDM_MACRO name=dtlStartRow>
-<PDM_MACRO name=dtlTextbox hdr="Descrição do usuário" attr=alg.description colspan=4 rows=8 size=80 spellchk=yes>
+<PDM_MACRO name=dtlTextbox hdr="Descrição do usuário" attr=alg.description colspan=4 rows=8 size=80 spellchk=yes make_required=yes>
 
 if (resp_ids.length > 1)
 {

@@ -38,9 +38,6 @@ TABLE wsptbl
 	"3183EBBE79549F46BC62232A2520F01C" ,"06/18/2013 18:17:43" ,"",
 	"wsptbl:400012" ,"code" ,"z_srv_subcat2" ,"" ,"" ,"" ,"3" ,"z_srv_subcat2",
 	"0" ,"0" ,"" }
-	{ "" ,"" ,"" ,"" ,"Códigos de encaminhamento" ,"" ,"400013" ,"0" ,"1",
-	"C19D90AC3C81F54DA82C523711A010D9" ,"06/19/2013 14:56:00" ,"",
-	"wsptbl:400013" ,"" ,"ztransfcode" ,"" ,"" ,"" ,"3" ,"ztransfcode" ,"0" ,"0" ,"" }
 	{ "" ,"" ,"" ,"" ,"Tipo de Organização" ,"" ,"400014" ,"0" ,"1",
 	"3183EBBE79549F46BC62232A2520F01C" ,"06/20/2013 15:10:05" ,"",
 	"wsptbl:400014" ,"" ,"z_tipo_org" ,"" ,"" ,"" ,"3" ,"z_tipo_org" ,"0" ,"0" ,"" }
@@ -50,4 +47,9 @@ TABLE wsptbl
 	{ "" ,"" ,"" ,"" ,"Categoria x Org" ,"" ,"400016" ,"0" ,"1",
 	"3183EBBE79549F46BC62232A2520F01C" ,"06/20/2013 15:10:05" ,"",
 	"wsptbl:400016" ,"" ,"z_cr_cat_org" ,"" ,"" ,"" ,"3" ,"z_cr_cat_org" ,"0",
+	"0" ,"" }
+	{ "sym" ,"" ,"Fac_Attr_Entry ztransfcode" ,"",
+	"Códigos de encaminhamento" ,"" ,"400017" ,"0" ,"1",
+	"C19D90AC3C81F54DA82C523711A010D9" ,"06/26/2013 08:22:53" ,"",
+	"wsptbl:400017" ,"id" ,"ztransfcode" ,"" ,"" ,"" ,"3" ,"ztransfcode" ,"0",
 	"0" ,"" }

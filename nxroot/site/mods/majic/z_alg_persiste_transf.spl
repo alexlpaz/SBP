@@ -1,0 +1,57 @@
+////////////////////////////////////////////////////////////////////////
+// Method:      z_alg_persiste_transf
+// Author:      Alex Paz
+// Created:     Wednesday, June 26, 2013 12:00:18 AM
+// Use Case:    Spec X.X - UC 1.1.1.1
+// Modified by: 
+// Modified:
+//
+// Description: No momento da transferência do grupo, se código de tranferência é do tipo "tranfere para Servidesk" , valida se Novo Grupo é de ServiceDesk
+//
+// Parameters:  
+//
+////////////////////////////////////////////////////////////////////////
+alg::z_alg_persiste_transf(...)
+{    
+	int zi, zi_depurar;
+	string zs_metodo;
+	zs_metodo = 'z_alg_persiste_transf - ';
+
+    // Alterar valor zi_depurar parar 1 para debug mode
+    zi_depurar = 0;
+        
+    // Entrada para debug mode
+    if ( zi_depurar==1 ) { 
+        logf(SIGNIFICANT, "============================================================="); 
+        logf(SIGNIFICANT, "%s Inicio - $s", zs_metodo, (string) now());
+        logf(SIGNIFICANT, "%s User - '%s'", zs_metodo, thread_userid());
+        logf(SIGNIFICANT, "%s ARG Count : %d", zs_metodo, argc);
+        for (zi=0; zi<argc; zi+=1) {
+            logf(SIGNIFICANT, "%s ARG #%s : %s", zs_metodo, (string) zi, (string) argv[zi]);          
+        } ;
+        logf(SIGNIFICANT, "============================================================="); 
+    } ;      
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Inicio do codigo
+    string zs_msg, zs_campo, zs_valor, zs_wc, zs_status, zs_persid;
+    object zo_groupLeader, zo_cr, zo_lista, zo_item;
+    int zi_lista, zi_index;
+
+    if ( call_req_id.group.z_int_gruposd == 1 && ( is_null(z_srl_transfcode.z_int_transf_sd) || z_srl_transfcode.z_int_transf_sd == 0 )  || 
+       ( is_null(call_req_id.group.z_int_gruposd) || call_req_id.group.z_int_gruposd == 0 ) && z_srl_transfcode.z_int_transf_sd == 1 ) {
+        if (zi_depurar==1) {logf(SIGNIFICANT, "%s Grupo:%d, Transf:%d Block...", zs_metodo,call_req_id.group.z_int_gruposd,z_srl_transfcode.z_int_transf_sd);};
+        send_wait( 0, this, "get_attr_vals",2, "call_req_id.group.last_name", "z_srl_transfcode.sym");
+        zs_campo = msg[3];
+        zs_valor = msg[6];
+        set_error(1);
+        zs_msg=format("Grupo %s e código de tranferência %s não são compatíveis para enviar ao ServiceDesk.",zs_campo, zs_valor);
+        set_return_data(zs_msg);       
+    } else {
+        if (zi_depurar==1) {logf(SIGNIFICANT, "%s Grupo:%d, Transf:%d Passou...", zs_metodo,call_req_id.group.z_int_gruposd,z_srl_transfcode.z_int_transf_sd);};
+    } ;    
+    
+    // Fim do codigo
+    ///////////////////////////////////////////////////////////////////////////////////////
+	z_bloco_fim(zi_depurar, zs_metodo);
+
+} ;

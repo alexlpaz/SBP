@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp.mods
-// Data de publicação: 25/06/2013 08:49:36
+// Data de publicação: 26/06/2013 08:36:13
 // Usuário publicador: ServiceDesk
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -574,6 +574,7 @@ OBJECT z_tipo_trat_espec {
 
 ////////////////////////////////////////////////////////////////////////
 // Fábrica:   ztransfcode (Códigos de encaminhamento)
+// Descrição: Fac_Attr_Entry ztransfcode
 ////////////////////////////////////////////////////////////////////////
 
 OBJECT ztransfcode {
@@ -585,7 +586,7 @@ OBJECT ztransfcode {
       {
       ON_NEW DEFAULT 0;
       };
-    description STRING 526;
+    description STRING 526; // Desc
     sym STRING 256
       REQUIRED;
     z_int_transf_sd INTEGER
@@ -604,5 +605,6 @@ OBJECT ztransfcode {
       RLIST OFF;
     };
     REL_ATTR id;
+    COMMON_NAME sym;
   };
 };

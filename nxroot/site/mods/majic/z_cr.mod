@@ -40,8 +40,8 @@ MODIFY cr POST_CI
 // Author:      Alex Paz - Friday, June 21, 2013 6:07:17 PM 
 // Description: Incrementa o controle ao no ticket reclassificar 
 MODIFY cr POST_CI
-    z_cr_grava_reclass( persistent_id, z_int_reclass )
-    7010 FILTER( (EVENT("UPDATE")) && ( category{} ) && type != "P" ) ;
+    z_cr_grava_reclass( persistent_id, z_int_reclass, category )
+    7010 FILTER( (EVENT("UPDATE")) && ( category{} && category != NULL ) && type != "P" ) ;
     
 // Author:      Alex Paz - Monday, June 24, 2013 12:17:36 PM 
 // Description: Replica informações do pai no relacionamento dos filhos 
@@ -49,3 +49,8 @@ MODIFY cr POST_CI
     z_cr_definicoes_filho( persistent_id, parent )
     7020 FILTER( (EVENT("INSERT UPDATE")) && ( parent{NULL->} ) && type != "P" ) ;     
 
+// Author:      Alex Paz - Friday, June 26, 2013 1:47:01 AM
+// Description: Incrementa o controle no ticket ao redirecionar para outro grupo
+MODIFY cr POST_CI
+    z_cr_grava_redir( persistent_id, z_int_num_redir, group )
+    7030 FILTER( (EVENT("UPDATE")) && ( group{} && group != NULL ) && type != "P" ) ;

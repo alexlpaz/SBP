@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_schema.sch
-// Data de publicação: 25/06/2013 08:49:36
+// Data de publicação: 26/06/2013 08:36:13
 // Usuário publicador: ServiceDesk
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -203,7 +203,7 @@ TABLE ztransfcode {
   last_mod_dt	 LOCAL_TIME;
   last_mod_by	 UUID REF ca_contact;
   delete_flag	INTEGER REF Active_Boolean_Table;
-  description	STRING 526;
+  description	STRING 526;// Desc
   sym	STRING 256 UNIQUE;
   z_int_transf_sd	INTEGER;
 }

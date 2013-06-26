@@ -351,6 +351,7 @@ if (argID != 0)
 <PDM_MACRO name=dtlReadonly hdr="Última modificação feita por" attr="last_mod_by">
 <PDM_IF "$args.type.id" == "2308">
 <PDM_MACRO name=dtlLookup hdr="Líder do Grupo Solucionador" attr="z_srl_lider">
+<PDM_MACRO name=dtlCheckbox hdr="Grupo do ServiceDesk?" attr=z_int_gruposd off=Não on=Sim title="Grupo de 1º atendimento">
 <PDM_ELSE>
 <PDM_MACRO name=dtlLookup hdr="Tratamento Especial" attr="z_srl_tipo_trat_espec">
 </PDM_IF>
