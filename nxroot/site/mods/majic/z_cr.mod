@@ -66,8 +66,8 @@ MODIFY cr POST_CI z_transfere_ciclo_vida ( persistent_id, assignee , group, stat
 MODIFY cr POST_CI z_encerra_ciclo_vida( persistent_id, assignee, group, status, open_date, close_date, time_spent_sum, category )
   7160 FILTER( status { -> 'CL'});
 
-MODIFY cr POST_CI z_cr_controla_slo ( persistent_id, group, category )
-  7170 FILTER( group{} );
+//MODIFY cr POST_CI z_cr_controla_slo ( persistent_id, group, category )
+//  7170 FILTER( group{} );
   
 MODIFY cr POST_CI z_cr_marca_violacoes ( persistent_id, sla_violation )
   7180 FILTER (EVENT(UPDATE) && (z_int_slo{} || sla_violation{} )) ;
