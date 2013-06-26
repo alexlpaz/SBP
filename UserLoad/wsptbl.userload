@@ -1,0 +1,53 @@
+TABLE wsptbl
+	common_name dbms_name description display_group display_name function_group
+	id is_local is_wsp last_mod_by last_mod_dt methods persid rel_attr schema_name
+	sl_sort_by sl_where sort_by status table_name table_type tenancy_type triggers
+	
+	{ "sym" ,"" ,"Fac_Attr_Entry z_tipo_trat_espec" ,"",
+	"Tratamento Especial" ,"reference" ,"400003" ,"0" ,"1",
+	"3183EBBE79549F46BC62232A2520F01C" ,"05/20/2013 13:46:43" ,"",
+	"wsptbl:400003" ,"code" ,"z_tipo_trat_espec" ,"" ,"" ,"" ,"3",
+	"z_tipo_trat_espec" ,"0" ,"0" ,"" }
+	{ "" ,"" ,"" ,"" ,"Histórico de Níveis de Serviço" ,"" ,"400004" ,"0",
+	"1" ,"3183EBBE79549F46BC62232A2520F01C" ,"05/20/2013 16:34:08" ,"",
+	"wsptbl:400004" ,"" ,"z_cr_slo" ,"" ,"" ,"" ,"3" ,"z_cr_slo" ,"0" ,"0" ,"" }
+	{ "sym" ,"" ,"Categoria do Serviço." ,"" ,"Categoria do Serviço",
+	"ci_reference" ,"400005" ,"0" ,"1" ,"3183EBBE79549F46BC62232A2520F01C",
+	"06/18/2013 15:16:18" ,"" ,"wsptbl:400005" ,"code" ,"z_srv_categoria" ,"",
+	"" ,"" ,"3" ,"z_srv_categoria" ,"0" ,"0" ,"" }
+	{ "sym" ,"",
+	"Ciclo de Vida dos serviços existentes no Catálogo de Serviços Sabesp.",
+	"" ,"Ciclo de Vida dos serviços" ,"ci_reference" ,"400006" ,"0" ,"1",
+	"3183EBBE79549F46BC62232A2520F01C" ,"06/18/2013 15:16:18" ,"",
+	"wsptbl:400006" ,"code" ,"z_srv_ciclo_vida" ,"" ,"" ,"" ,"3",
+	"z_srv_ciclo_vida" ,"0" ,"0" ,"" }
+	{ "sym" ,"" ,"" ,"" ,"Torre do Serviço" ,"ci_reference" ,"400008" ,"0",
+	"1" ,"3183EBBE79549F46BC62232A2520F01C" ,"06/18/2013 15:16:18" ,"",
+	"wsptbl:400008" ,"code" ,"z_srv_torre" ,"" ,"" ,"" ,"3" ,"z_srv_torre" ,"0",
+	"0" ,"" }
+	{ "sym" ,"" ,"" ,"" ,"Subcategoria do Serviço" ,"ci_reference" ,"400009",
+	"0" ,"1" ,"3183EBBE79549F46BC62232A2520F01C" ,"06/18/2013 15:16:18" ,"",
+	"wsptbl:400009" ,"code" ,"z_srv_subcat" ,"" ,"" ,"" ,"3" ,"z_srv_subcat",
+	"0" ,"0" ,"" }
+	{ "sym" ,"" ,"Fac_Attr_Entry z_srv_foco" ,"" ,"Foco do Serviço",
+	"ci_reference" ,"400011" ,"0" ,"1" ,"3183EBBE79549F46BC62232A2520F01C",
+	"06/18/2013 18:17:43" ,"" ,"wsptbl:400011" ,"code" ,"z_srv_foco" ,"" ,"" ,"",
+	"3" ,"z_srv_foco" ,"0" ,"0" ,"" }
+	{ "sym" ,"" ,"Fac_Attr_Entry z_srv_subcat2" ,"",
+	"Subcategoria 2 do Serviço" ,"ci_reference" ,"400012" ,"0" ,"1",
+	"3183EBBE79549F46BC62232A2520F01C" ,"06/18/2013 18:17:43" ,"",
+	"wsptbl:400012" ,"code" ,"z_srv_subcat2" ,"" ,"" ,"" ,"3" ,"z_srv_subcat2",
+	"0" ,"0" ,"" }
+	{ "" ,"" ,"" ,"" ,"Códigos de encaminhamento" ,"" ,"400013" ,"0" ,"1",
+	"C19D90AC3C81F54DA82C523711A010D9" ,"06/19/2013 14:56:00" ,"",
+	"wsptbl:400013" ,"" ,"ztransfcode" ,"" ,"" ,"" ,"3" ,"ztransfcode" ,"0" ,"0" ,"" }
+	{ "" ,"" ,"" ,"" ,"Tipo de Organização" ,"" ,"400014" ,"0" ,"1",
+	"3183EBBE79549F46BC62232A2520F01C" ,"06/20/2013 15:10:05" ,"",
+	"wsptbl:400014" ,"" ,"z_tipo_org" ,"" ,"" ,"" ,"3" ,"z_tipo_org" ,"0" ,"0" ,"" }
+	{ "" ,"" ,"" ,"" ,"Nível Hierárquico" ,"" ,"400015" ,"0" ,"1",
+	"3183EBBE79549F46BC62232A2520F01C" ,"06/20/2013 15:10:05" ,"",
+	"wsptbl:400015" ,"" ,"z_niv_hier" ,"" ,"" ,"" ,"3" ,"z_niv_hier" ,"0" ,"0" ,"" }
+	{ "" ,"" ,"" ,"" ,"Categoria x Org" ,"" ,"400016" ,"0" ,"1",
+	"3183EBBE79549F46BC62232A2520F01C" ,"06/20/2013 15:10:05" ,"",
+	"wsptbl:400016" ,"" ,"z_cr_cat_org" ,"" ,"" ,"" ,"3" ,"z_cr_cat_org" ,"0",
+	"0" ,"" }
