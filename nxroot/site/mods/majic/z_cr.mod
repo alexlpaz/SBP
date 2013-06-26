@@ -27,7 +27,9 @@ MODIFY cr PRE_VALIDATE
     5000 FILTER( (EVENT("INSERT UPDATE")) && category{} && category != NULL && type != "P") ;
 ////////////////////////////////////////////////////////////////////////////////
 // Post Validate - 6xxx
-
+MODIFY cr POST_VALIDATE
+    z_cr_urg_trat_espec( persistent_id, producer_id )
+    6001 FILTER( (EVENT("INSERT UPDATE")) && ( urgency{} || customer{} ) ) ;
 
 ////////////////////////////////////////////////////////////////////////////////
 // Post CI - 7xxx
@@ -54,3 +56,18 @@ MODIFY cr POST_CI
 MODIFY cr POST_CI
     z_cr_grava_redir( persistent_id, z_int_num_redir, group )
     7030 FILTER( (EVENT("UPDATE")) && ( group{} && group != NULL ) && type != "P" ) ;
+    
+MODIFY cr POST_CI z_inicio_ciclo_vida( persistent_id, group, status, time_spent_sum, assignee, category )
+  7140   FILTER( EVENT ("INSERT"));
+        
+MODIFY cr POST_CI z_transfere_ciclo_vida ( persistent_id, assignee , group, status, open_date, close_date, category )
+  7150 FILTER( EVENT(UPDATE) && ((group {} || status {} || assignee {} || category{} ) && status != 'CL'));
+
+MODIFY cr POST_CI z_encerra_ciclo_vida( persistent_id, assignee, group, status, open_date, close_date, time_spent_sum, category )
+  7160 FILTER( status { -> 'CL'});
+
+MODIFY cr POST_CI z_cr_controla_slo ( persistent_id, group, category )
+  7170 FILTER( group{} );
+  
+MODIFY cr POST_CI z_cr_marca_violacoes ( persistent_id, sla_violation )
+  7180 FILTER (EVENT(UPDATE) && (z_int_slo{} || sla_violation{} )) ;

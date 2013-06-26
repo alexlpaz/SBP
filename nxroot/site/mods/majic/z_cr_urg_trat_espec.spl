@@ -1,0 +1,132 @@
+////////////////////////////////////////////////////////////////////////
+// Module:      
+// Author:      Lucas Guimaraes
+// Created:     
+////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////
+// Method:      z_cr_urg_trat_espec
+// Author:      Lucas Guimaraes
+// Created:     
+// Use Case:    Spec X.X - UC 1.1.1.1
+// Modified by: 
+// Modified:
+//
+// Description: Este script faz... 
+//
+// Parameters:  
+//              zs_pcatGroups       - Lista de grupos
+//              zi_pcatGroups       - Numero de grupos na lista
+//              zs_local            - ID do local a ser verificado
+//
+////////////////////////////////////////////////////////////////////////
+cr::z_cr_urg_trat_espec(...)
+{
+    
+    
+	int zi, zi_depurar;
+	string zs_metodo;
+	zs_metodo = 'z_cr_urg_trat_espec - ';
+
+    // Alterar valor zi_depurar parar 1 para debug mode
+    zi_depurar = 1;
+        
+    // Entrada para debug mode
+    if ( zi_depurar==1 ) { 
+        logf(SIGNIFICANT, "============================================================="); 
+        logf(SIGNIFICANT, "%s Inicio - $s", zs_metodo, (string) now());
+        logf(SIGNIFICANT, "%s User - '%s'", zs_metodo, thread_userid());
+        logf(SIGNIFICANT, "%s ARG Count : %d", zs_metodo, argc);
+        for (zi=0; zi<argc; zi+=1) {
+            logf(SIGNIFICANT, "%s ARG #%s : %s", zs_metodo, (string) zi, (string) argv[zi]);          
+        } ;
+        logf(SIGNIFICANT, "============================================================="); 
+    } ;      
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Inicio do codigo
+    string zs_msg, zs_campo, zs_valor, zs_wc, zs_status, zs_persid,zs_trat;
+    object zo_groupLeader, zo_cr, zo_lista, zo_item;
+    int zi_lista, zi_index,zi_urg,zi_incremento,zi_urgencia;
+    
+    zs_trat = customer.z_srl_tipo_trat_espec.code;
+    
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Verificando se user tem tratamento especial", zs_metodo ); } ;
+    
+    if(!is_empty(zs_trat)) { 
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Usuario eh: %s", zs_metodo, zs_trat); } ;
+        
+        if(urgency >= 0) zi_urg = urgency;
+        else zi_urg=-1;
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Urgencia do ticket: %s", zs_metodo,zi_urg ); } ;
+    
+    if(type == "I") zi_incremento = customer.z_srl_tipo_trat_espec.z_int_in_urg_up;
+    else if (type == "R") zi_incremento = customer.z_srl_tipo_trat_espec.z_int_cr_urg_up;
+    else zi_incremento = customer.z_srl_tipo_trat_espec.z_int_pr_urg_up;
+    
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Incremento a ser feito na urgencia: %s", zs_metodo,zi_incremento ); } ;
+    
+    if(zi_incremento != 0) {
+        zi_urgencia = zi_urg + zi_incremento;
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nova urgencia: %s", zs_metodo, zi_urgencia ); } ;
+        
+        zi_lista = 0;
+        
+        while(zi_lista==0) {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Validando urgencia: %s", zs_metodo,zi_urgencia ); } ;
+            
+            //verificando se eh uma urgencia valida
+            //Efetua uma busca dos objetos urg no banco de dados a partir da clausula definida em zs_wc
+            zs_wc = format("enum=%s",zi_urgencia );
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lista de urg: %s", zs_metodo,  zs_wc); } ;        
+            send_wait( 0, top_object(), "call_attr", "urg", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+            if ( msg_error() ) {
+                logf(ERROR, "%s Erro ao definir lista de urg's: %s", zs_metodo,  msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);
+                return;
+            } ;
+            zo_lista = msg[0] ;
+            zi_lista = (int) msg[1] ;   
+            
+            if(zi_lista==0) zi_urgencia = zi_urgencia - 1;
+        }
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Urgencia a ser atribuida: %s", zs_metodo,zi_urgencia ); } ;
+        if(zi_urg != zi_urgencia) {
+        
+            //Define o valor zs_valor no campo zs_campo do objeto 
+            zs_campo = "urgency";
+            zs_valor = (string) zi_urgencia;
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo valor: '%s' no campo '%s'", zs_metodo, zs_valor, zs_campo ); } ;
+            send_wait(0, this, "call_attr", zs_campo, "set_val", zi_urgencia, "SURE_SET");
+            if ( msg_error() ) {
+                logf(ERROR, "%s ERRO ao persistir valor: %s", zs_metodo,  msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);
+                return;
+            } else {
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Valor persistido com sucesso", zs_metodo ); } ;
+            } ;
+            
+            
+        }
+        else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Urgencia nao precisa ser modificada. Saindo.", zs_metodo ); } ;
+            
+        }
+        
+    }
+    else {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Incremento zero. Saindo.", zs_metodo ); } ;
+    }
+        
+    }
+    else {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Usuario nao tem tratamento especial. Saindo.", zs_metodo ); } ;
+        
+    }
+    
+    
+            
+
+    // Fim do codigo
+    ///////////////////////////////////////////////////////////////////////////////////////
+	z_bloco_fim(zi_depurar, zs_metodo);
+
+} ;

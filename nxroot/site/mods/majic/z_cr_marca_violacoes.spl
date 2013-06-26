@@ -1,0 +1,133 @@
+////////////////////////////////////////////////////////////////////////
+// Module:      z_cr_marca_violacoes.spl
+// Author:      Alex Paz
+// Created:     Tuesday, November 06, 2012 3:14:46 PM
+////////////////////////////////////////////////////////////////////////
+
+cr::z_cr_marca_violacoes(...)
+{
+    int zi, zi_depurar;
+	string zs_metodo;
+	zs_metodo = 'z_cr_marca_violacoes - ';
+
+    // Alterar valor zi_depurar parar 1 para debug mode
+    zi_depurar = 1;
+        
+    // Entrada para debug mode
+    if ( zi_depurar==1 ) { 
+        logf(SIGNIFICANT, "============================================================="); 
+        logf(SIGNIFICANT, "%s Inicio - $s", zs_metodo, (string) now());
+        logf(SIGNIFICANT, "%s User - '%s'", zs_metodo, thread_userid());
+        logf(SIGNIFICANT, "%s ARG Count : %d", zs_metodo, argc);
+        for (zi=0; zi<argc; zi+=1) {
+            logf(SIGNIFICANT, "%s ARG #%s : %s", zs_metodo, (string) zi, (string) argv[zi]);          
+        } ;
+        logf(SIGNIFICANT, "============================================================="); 
+    } ;      
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Inicio do codigo
+    string zs_Incidente,zs_wc, zs_msg;
+    object zo_list,zo_objeto, zo_cr, zo_groupLeader;
+    int zi_num, sla;
+    sla = 0;
+
+    send_wait(0, top_object(), "get_co_group");
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao criar group leader: ", zs_metodo,  msg[0]);
+        return;
+    } ;
+    zo_groupLeader = msg[0];
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Group leader: '%s'", zs_metodo, (string) zo_groupLeader ); } ; 
+
+    if ( argv[6] != argv[5] && argv[6] > 0 ) {
+        sla = 1;
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Primeira violacao de SLA!", zs_metodo); } ; 
+        send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, (string) argv[3]);
+        if ( msg_error() ) {
+  		    logf(ERROR, "%s Erro ao instanciar cr: %s", zs_metodo, msg[0]);
+  		    z_bloco_fim(zi_depurar, zs_metodo);
+  		    return;
+  	    } ;
+        zo_cr=msg[0];
+        send_wait(0, zo_groupLeader, "checkout", zo_cr);
+        if ( msg_error() ) {
+            sleep(5);
+            send_wait(0, zo_groupLeader, "checkout", zo_cr);
+            if ( msg_error() ) {
+                sleep(10);
+                send_wait(0, zo_groupLeader, "checkout", zo_cr);
+                if ( msg_error() ) {
+                    logf(ERROR, "%s Erro ao fazer checkout da cr: %s", zs_metodo, msg[0]);
+                    z_bloco_fim(zi_depurar, zs_metodo);
+  		            return;
+                };
+            };
+        };
+        send_wait(0, zo_cr, "call_attr", "z_dt_violacao_sla", "set_val", now(), "SURE_SET" );
+        send_wait(0, zo_groupLeader, "checkin", zo_cr);
+        if ( msg_error() ) {
+             logf(ERROR, "%s Erro ao gravar data de violacao no chamado: %s", zs_metodo, msg[0]);
+             z_bloco_fim(zi_depurar, zs_metodo);
+        };
+    } else {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s SLA nao violado", zs_metodo); } ;
+    };    
+    
+    zs_wc = format("z_srl_cr = '%s'",argv[3] );
+    send_wait( 0, top_object(), "call_attr", "z_cr_slo", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao definir lista de Ciclo de Vida: %s", zs_metodo,  msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    } ;
+    zo_list = msg[0] ;
+    zi_num = (int) msg[1] ;   
+    if ( zi_num > 0 ) {
+        zi_num = zi_num - 1;
+        //Pega o ultimo ciclo
+        send_wait( 0, zo_list, "dob_by_index", "DEFAULT", zi_num, zi_num);
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao instanciar Ciclo de Vida: %s", zs_metodo,  msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } ;
+        zo_objeto = msg[0];
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro", zs_metodo ); } ;	
+        send_wait(0, zo_groupLeader, "checkout", zo_objeto); 
+        if ( msg_error() ) {
+            sleep(10);
+            send_wait(0, zo_groupLeader, "checkout", zo_objeto); 
+            if ( msg_error() ) {
+                sleep(10);
+                send_wait(0, zo_groupLeader, "checkout", zo_objeto);
+                if ( msg_error() ) {
+                    zs_msg = format("%s Outras pessoas estão editando o ticket %s - Não foi possível travar para gravação o registro.", zs_metodo )  ;
+                    set_error(1);
+                    set_return_data(zs_msg);
+                    z_bloco_fim(zi_depurar, zs_metodo);                
+                    return;
+                } ;
+            } ;
+        } ;
+        if ( sla == 1 ) {
+            send_wait(0, zo_objeto, "call_attr", "z_dt_violacao_sla", "set_val", now(), "SURE_SET" );
+        } else {
+            send_wait(0, zo_objeto, "call_attr", "z_dt_violacao_slo", "set_val", now(), "SURE_SET" );
+        } ;
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao definir violacao sla/slo no z_cr_slo: %s", zs_metodo,  msg[0]);
+            return;
+        } ;
+        send_wait(0, zo_groupLeader, "checkin", zo_objeto); 
+            if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao fazer checkin: %s", zs_metodo,  msg[0]);
+            return;
+        } ;
+    } else { //do numero de registros na lista
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nao encontramos item na lista.", zs_metodo); } ;
+    } ;
+    // Fim do codigo
+    ///////////////////////////////////////////////////////////////////////////////////////
+	z_bloco_fim(zi_depurar, zs_metodo);
+} ;
+

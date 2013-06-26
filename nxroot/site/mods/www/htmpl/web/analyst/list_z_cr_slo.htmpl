@@ -9,13 +9,53 @@ INTENT:
 <PDM_PRAGMA RELEASE=110>
 <PDM_INCLUDE FILE=styles.htmpl>
 <SCRIPT LANGUAGE="JavaScript">
-var hdrTitle = "Histórico de Níveis de Serviço - Pesquisa";
-var hdrTitleList = "Histórico de Níveis de Serviço Lista";
+var hdrTitle = "Pesquisa SLO";
+var hdrTitleList = "Ciclo de vida";
 </SCRIPT>
 <PDM_INCLUDE FILE=std_head.htmpl >
 <SCRIPT LANGUAGE="JavaScript">
 var rptName = new Array("z_cr_slosum.rpt", "z_cr_slodtl.rpt");
-var cfgCanEdit = false;
+function converte_data(unix_timestamp)
+{
+	if(unix_timestamp != "")
+	{
+		var date = new Date(unix_timestamp*1000);
+		var dia = completa_formato(date.getDate());
+		var mes = completa_formato(date.getMonth()+1);
+		var ano = date.getFullYear();
+		var hours = completa_formato(date.getHours());
+		var minutes = completa_formato(date.getMinutes());
+		var seconds = completa_formato(date.getSeconds());
+		var formattedTime = dia + '/' + mes + '/' + ano + ' ' + hours + ':' + minutes + ':' + seconds;
+		rs.data(formattedTime);
+	} else {
+		rs.data("");
+	}
+}
+
+function completa_formato(valor)
+{
+	if(valor.toString().length <= 1){
+		valor="0"+valor;
+	}
+	return(valor);
+}
+
+function seg2hhmmss(seg)
+{
+	var horas=Math.floor(seg / (60 * 60));
+	var div_min=seg % (60 * 60);
+	var min=Math.floor(div_min / 60);
+	var div_seg=div_min % 60;
+	var segs=Math.ceil(div_seg);
+	var retorno = completa_formato(horas) + ":" + completa_formato(min) + ":" + completa_formato(segs);
+	if(seg != "")
+		rs.data(retorno);
+	else
+		rs.data("");
+}
+
+
 </SCRIPT>
 <PDM_INCLUDE FILE=std_list_include.htmpl>
 <SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
@@ -23,35 +63,42 @@ var cfgCanEdit = false;
 <BODY CLASS="list">
 <PDM_INCLUDE FILE=std_body.htmpl filename="_{factory_desc}">
 <SCRIPT LANGUAGE="JavaScript">
-<PDM_MACRO NAME=sfStart factory="z_cr_slo" create=false>
-<PDM_MACRO name=sfStartRow>
-<PDM_MACRO name=sfDate hdr="Data inicial da ação" attr="z_int_transf_1_INT_DATE" qbe_condition=GE>
-<PDM_MACRO name=sfDate hdr="Data final da ação" attr="z_int_transf_2_INT_DATE" qbe_condition=LE>
-<PDM_MACRO name=sfLookup hdr="Responsável da ação" attr="z_srl_analista.combo_name" factory=cnt>
-<PDM_IF "z_cr_slo" : "^z.*$">
+<PDM_MACRO NAME=sfStart factory="z_cr_slo" button=false>
+
 document.writeln("<input type=hidden id=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE='id IS NOT NULL'>");
-</PDM_IF>
+
 <PDM_MACRO NAME=sfEnd>
 </SCRIPT>
 <PDM_FORM NAME="frmFID">
 </PDM_FORM>
 <PDM_IF "${current:n/a}" != "n/a">
   <script language="JavaScript">
-  var msgFoundNone = "Nenhum Histórico de Níveis de Serviços encontrado";
-  var msgFound1 = "1 Histórico de Níveis de Serviço encontrado";
-  var msgFound = "%1 Histórico de Níveis de Serviços encontrado(s)";
-  var msgFoundMore = "%1 Histórico de Níveis de Serviços localizado(a).  Exibindo de %2 a %3";
-  var msgSelect = "Clique para selecionar o Histórico de Níveis de Serviço";
+  var msgFoundNone = "Nenhum ciclo de vida encontrado";
+  var msgFound1 = "1 ciclo de vida encontrado";
+  var msgFound = "%1 ciclos de vida encontrado(s)";
+  var msgFoundMore = "%1 ciclo de vida encontrado(a).  Exibindo de %2 a %3";
+  var msgSelect = "Clique para selecionar o ciclo de vida";
   
-<PDM_MACRO name=lsStart>
-<PDM_MACRO name=lsCol hdr="Responsável pela ação" attr="z_srl_analista" startrow="no">
-<PDM_MACRO name=lsCol hdr="Tempo total da ação (Grupo Solucionador)" attr="z_int_tempo_wsgrp">
-<PDM_MACRO name=lsCol hdr="Tempo total da ação (24x7)" attr="z_int_tempo_total">
-<PDM_MACRO name=lsCol hdr="Tempo total da ação (Serviço)" attr="z_int_tempo_wssvc">
-<PDM_MACRO name=lsEnd>
+<PDM_MACRO NAME=lsStart>
+	<PDM_MACRO NAME=lsCol hdr="Início" attr=z_int_transf_1 justify=left fmtfunc=converte_data sort=no>
+	<PDM_MACRO NAME=lsCol hdr="Fim" attr=z_int_transf_2 justify=left fmtfunc=converte_data sort=no>
+	<PDM_MACRO NAME=lsCol hdr="Tempo Total" attr=z_int_tempo_total justify=left fmtfunc=seg2hhmmss sort=no>
+	<PDM_MACRO NAME=lsCol hdr="Tempo Grupo" attr=z_int_tempo_wsgrp justify=left fmtfunc=seg2hhmmss sort=no>
+	<PDM_MACRO NAME=lsCol hdr="Tempo Serviço" attr=z_int_tempo_wssvc justify=left fmtfunc=seg2hhmmss sort=no>
+	<PDM_MACRO NAME=lsCol hdr="Responsável" attr=z_srl_responsavel justify=left sort=no>
+	<PDM_MACRO NAME=lsCol hdr="Grupo" attr=z_srl_grupo justify=left sort=no>
+	<PDM_MACRO NAME=lsCol hdr="Categoria" attr=z_srl_categoria justify=left sort=no max_char=60>
+	<PDM_MACRO NAME=lsCol hdr="Status" attr=z_srl_status justify=left sort=no>
+	<PDM_MACRO NAME=lsCol hdr="Resp. pela ação" attr=z_srl_analista justify=left sort=no>
+	<PDM_MACRO NAME=lsCol hdr="Viol. SLA" attr=z_dt_violacao_sla justify=left sort=no>
+	<PDM_MACRO NAME=lsCol hdr="Viol. SLO" attr=z_dt_violacao_slo justify=left sort=no>
+<PDM_MACRO NAME=lsEnd>
+
+ctxMenu=new ContextMenu("SLO");
+ctxMenu.finish();  
   </script>
 </PDM_IF>
-
+<BASE TARGET="_top">
 <PDM_INCLUDE FILE="std_footer.htmpl">
 </BODY>
 </HTML>

@@ -927,7 +927,7 @@ if(propSearchConfig.indexOf("description*") > -1)
 <PDM_IF "$env.NX_SAP_GUID" != "">
 <PDM_MACRO name=TAB title="SAP" file="cr_sap_tab.htmpl" height=300>
 </PDM_IF>
-<PDM_MACRO name=TAB title="Ciclo de Vida" height=300 id=zciclo src="OP=SEARCH+FACTORY=z_cr_slo+QBE.EQ.z_srl_cr=$args.persistent_id">
+<PDM_MACRO name=TAB title="Ciclo de Vida" src="OP=SEARCH+FACTORY=z_cr_slo+QBE.EQ.z_srl_cr=$args.persistent_id" height=300>
 <PDM_MACRO name=startTabGroup title="Logs">
 <PDM_IF "$prop.view_internal" == "0">
 <PDM_MACRO name=TAB title="Atividades" height=300 id=alg src="OP=SEARCH+FACTORY=alg+QBE.EQ.call_req_id=$args.persistent_id+QBE.EQ.internal=0">

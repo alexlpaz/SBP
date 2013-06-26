@@ -1,0 +1,229 @@
+cr::z_cr_controla_slo(...)
+{    
+	int zi, zi_depurar;
+	string zs_metodo;
+	zs_metodo = 'z_cr_controla_slo - ';
+
+    // Alterar valor zi_depurar parar 1 para debug mode
+    zi_depurar = 1;
+    // Entrada para debug mode
+    if ( zi_depurar==1 ) { 
+        logf(SIGNIFICANT, "============================================================="); 
+        logf(SIGNIFICANT, "%s Inicio - $s", zs_metodo, (string) now());
+        logf(SIGNIFICANT, "%s User - '%s'", zs_metodo, thread_userid());
+        logf(SIGNIFICANT, "%s ARG Count : %d", zs_metodo, argc);
+        for (zi=0; zi<argc; zi+=1) {
+            logf(SIGNIFICANT, "%s ARG #%s : %s", zs_metodo, (string) zi, (string) argv[zi]);          
+        } ;
+        logf(SIGNIFICANT, "============================================================="); 
+    } ;      
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Inicio do codigo
+    string zs_wc, zs_wc2, zs_persid, zs_persidGrp, zs_persidGrpAnt, zs_persidPcat, zi_slo_rel, zs_nome_grupo, evt_persid;
+    object zo_groupLeader, zo_lista, zo_item, zo_pcat, zo_grp, zo_grp_ant, evt_tpl, evnt_template, at_evnt, at_template;
+    int zi_lista, zi_index, zi_nivel_atd, evt_tpl_count, at_evnt_count, salva_grupo;
+    duration tempo, tempo_tia;
+
+    zs_persid = argv[3];
+    zs_persidGrp = format("cnt:%s",argv[6]);
+    zs_persidGrpAnt = format("cnt:%s",argv[5]);
+    zs_persidPcat = argv[9];
+    salva_grupo = 0;
+    
+    //Instancia a categoria
+    send_wait (0, top_object(), "call_attr", "pcat", "dob_by_persid", NULL, zs_persidPcat);
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao instanciar categoria: %s", zs_metodo,  msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    } ;
+    zo_pcat=msg[0];
+    //zi_slo_rel = (string) zo_pcat.z_srl_SLO;
+    //if ( !is_null(zi_slo_rel) ) {
+     //   zs_wc = format("id = %d", zi_slo_rel );
+     //   send_wait( 0, top_object(), "call_attr", "z_tempo_servico", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+     //   if ( msg_error() ) {
+     //       logf(ERROR, "%s Erro ao definir lista de z_tempo_servico's: %s", zs_metodo,  msg[0]);
+   //         z_bloco_fim(zi_depurar, zs_metodo);
+   //         return;
+   //     } ;
+  //      zo_lista = msg[0] ;
+    //    zi_lista = (int) msg[1] ;   
+    //    if ( zi_lista > 0 ) {
+    //        send_wait( 0, zo_lista, "dob_by_index", "DEFAULT", 0 , 0 );
+   //    	    if ( msg_error() ) {
+    //       	    logf(ERROR, "%s Erro ao instanciar o z_tempo_servico", zs_metodo);
+   //        	    z_bloco_fim(zi_depurar, zs_metodo);
+   //             return;
+   //         } ;
+    //   	    zo_item=msg[0];
+    //   	    salva_grupo = 1;
+   //     } ;
+  //  } else {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Categoria sem SLO relacionado, não vammos anexar para o grupo atual....", zs_metodo); } ;
+        salva_grupo = 0 ;         
+   //};    
+    
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Instanciando GL", zs_metodo ); } ;
+    send_wait(0, top_object(), "get_co_group");
+    if (msg_error()) {
+        logf(ERROR, "%s Erro ao instanciar GL: '%s'", msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    }
+    zo_groupLeader = msg[0];
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Group leader: '%s'", zs_metodo, (string) zo_groupLeader ); } ; 
+    
+    //Instancia o grupo anterior para cancelar atev
+    if ( !is_null(argv[5]) ) { 
+        send_wait (0, top_object(), "call_attr", "cnt", "dob_by_persid", NULL, zs_persidGrpAnt);
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao instanciar grupo anterior: %s", zs_metodo,  msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } ;
+        zo_grp_ant=msg[0];
+        zs_nome_grupo = zo_grp_ant.last_name;
+    
+        zs_wc=format("sym like '%s' AND z_srl_slo = 1 AND delete_flag <> 1 AND obj_type = 'cr'", zs_nome_grupo);	// pass event name to sym variable within the object 
+        send_wait(0, top_object(), "call_attr", "evt", "sync_fetch", "STATIC", zs_wc, -1, 0 );
+        if (msg_error()) {
+            logf(ERROR, "Erro ao buscar eventos do grupo anterior: '%s'", msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+	        return ;
+        } ;
+        evt_tpl=msg[0]; 
+        evt_tpl_count=msg[1];
+        if ( evt_tpl_count > 0 ) {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Encontrado %s eventos ref. ao grupo anterior", zs_metodo, evt_tpl_count ); } ;
+            send_wait(0, evt_tpl, "dob_by_index", "DEFAULT", 0, 0);
+		    if (msg_error()) {
+                logf(ERROR, method+"error in dob_by_index='%s'", msg[0]);
+        	    z_bloco_fim(zi_depurar, zs_metodo);
+        	    return ;
+            } ;
+		    evnt_template=msg[0];
+		    evt_persid = evnt_template.persistent_id;
+		    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nome do evento %s.", zs_metodo, evnt_template.sym ); } ;
+            zs_wc2=format("obj_id='%s' AND event_tmpl='%s' AND status_flag > 1", zs_persid, evt_persid);
+	        send_wait(0, top_object(), "call_attr", "atev", "sync_fetch", "STATIC", zs_wc2, -1, 0 );
+            if (msg_error()) {
+                logf(ERROR, "Erro ao buscar atev para o grupo anterior: '%s'", msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);
+                return ;
+	        } ;
+	        at_evnt=msg[0];
+	        at_evnt_count=msg[1];
+            if ( at_evnt_count > 0 ) { 
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Encontrado %s eventos anexados ref. ao grupo anterior", zs_metodo, at_evnt_count ); } ;
+                send_wait(0, at_evnt, "dob_by_index", "DEFAULT", 0, 0);
+                    if (msg_error()) {
+                    logf(ERROR, method+"error in dob_by_index='%s'", msg[0]);
+            	    z_bloco_fim(zi_depurar, zs_metodo);
+        	        return ;
+                } ;                    
+                at_template=msg[0];
+                send_wait(0, zo_groupLeader, "checkout", at_template);
+      		    send_wait(0, at_template, "cancel_me");
+  	     	    send_wait(0, zo_groupLeader, "checkin", at_template);
+                if (msg_error()) {
+                    logf(ERROR, "request auto event checkin failed ref grupo anterior: %s", msg[0]);
+                	send_wait(0, zo_groupLeader, "uncheck");
+                } else {
+                    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Evento %s cancelado ref. grupo anterior", zs_metodo, (string) evnt_template.sym ); } ;
+                };
+   		    } else {
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Não foi encontrado evento na ATEV ref. grupo anterior", zs_metodo ); } ;
+            } ;
+        } else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Não foi encontrado evento com o sym %s ref. grupo anterior.", zs_metodo, zs_nome_grupo ); } ;
+        };
+    } else {
+        if ( salva_grupo == 1 ) {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Chamado novo, anexando evento TIA", zs_metodo ); } ;
+            string zs_wc_tia;
+            int zi_evt_tia_num, index_tia;
+            zs_wc_tia="sym = 'Controla T.I.A' AND z_srl_slo = 1 AND delete_flag <> 1 AND obj_type = 'cr'" ;
+            send_wait(0, top_object(), "call_attr", "evt", "sync_fetch", "STATIC", zs_wc_tia, -1, 0 );
+            if (msg_error()) {
+                logf(ERROR, "Erro ao buscar evento T.I.A='%s'", msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);
+                return ;
+            } ;
+            zi_evt_tia_num=msg[1];
+            if ( zi_evt_tia_num > 0 ) {
+                if (!is_null(zo_item.z_dur_tia)) {
+                    tempo_tia = zo_item.z_dur_tia;
+                } else {
+                    tempo_tia = 0;
+                };
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Encontrado o evento de controle para o inicio do atendimento", zs_metodo ); } ;
+                send_wait(0, top_object(), "call_attr", "evt","new_attached_event", zo_groupLeader, zs_persid, "Controla T.I.A", (duration) tempo_tia, (date) NULL, "SLA", 0, 0, "");
+                send_wait(0, zo_groupLeader, "checkin");
+		        if (msg_error()) {
+                    logf(ERROR, "request auto event checkin failed: %s", msg[0]);
+		            send_wait(0, group_leader_add, "uncheck");
+		        } else {
+		            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Evento T.I.A anexado com exito", zs_metodo ); } ; 
+    		    } ;                 
+            } else {
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nao foi encontrado o evento para controlar o T.I.A", zs_metodo ); } ;
+            } ;       
+        } else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Chamado novo e categoria não tem slo, T.I.A nao controlado", zs_metodo ); } ;
+        } ;            
+    } ;
+    //Instancia o grupo atual para inserir o atev
+    if ( salva_grupo == 1 ) {
+        send_wait (0, top_object(), "call_attr", "cnt", "dob_by_persid", NULL, zs_persidGrp);
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao instanciar grupo atual: %s", zs_metodo,  msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } ;
+        zo_grp=msg[0];
+        zs_nome_grupo = zo_grp.last_name;
+        zi_nivel_atd = zo_grp.z_srl_nivel_atd;
+        if ( zi_nivel_atd == 1 ) {
+            tempo = zo_item.z_dur_n1;
+        } else if ( zi_nivel_atd == 2 ) {
+            tempo = zo_item.z_dur_n2;
+        } else if ( zi_nivel_atd == 3 ){
+            tempo = zo_item.z_dur_n3;
+        } else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Grupo sem nivel de Atd, assumindo o nivel 1", zs_metodo ); } ;
+            tempo = zo_item.z_dur_n1 ;
+        }; 
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Tempo de atendimento grupo nivel %d : %s", zs_metodo, zi_nivel_atd, tempo ); } ;
+        
+        zs_wc=format("sym like '%s' AND z_srl_slo = 1 AND delete_flag <> 1 AND obj_type = 'cr'", zs_nome_grupo);	// pass event name to sym variable within the object 
+
+        send_wait(0, top_object(), "call_attr", "evt", "sync_fetch", "STATIC", zs_wc, -1, 0 );
+        if (msg_error()) {
+            logf(ERROR, "error in sync_fetch='%s'", msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return ;
+        } ;
+        evt_tpl=msg[0];
+        evt_tpl_count=msg[1];
+    
+        if ( evt_tpl_count > 0 ) {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Encontrado %s eventos para anexar no atev", zs_metodo, evt_tpl_count ); } ;    
+            send_wait(0, top_object(), "call_attr", "evt","new_attached_event", zo_groupLeader, zs_persid, zs_nome_grupo, tempo, (date) NULL, "SLA", 0, 0, "");
+            send_wait(0, zo_groupLeader, "checkin");
+		    if (msg_error()) {
+                logf(ERROR, "request auto event checkin failed: %s", msg[0]);
+		        send_wait(0, group_leader_add, "uncheck");
+		    } else {
+		      if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Evento %s anexado com exito", zs_metodo, zs_nome_grupo ); } ; 
+		    } ;
+        } else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nao foi encontrado evento para o grupo atual...", zs_metodo); } ;
+        } ;        
+    } ;
+    // Fim do codigo
+    ///////////////////////////////////////////////////////////////////////////////////////
+	z_bloco_fim(zi_depurar, zs_metodo);
+
+} ;
+
