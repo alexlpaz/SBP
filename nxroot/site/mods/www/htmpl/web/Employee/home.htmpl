@@ -1,0 +1,951 @@
+<PDM_IF 0>
+////////////////////////////////////////////////////////////////////////////
+//         Copyright (C) 2002 Computer Associates International, Inc
+// as an unpublished work. This notice does not imply unrestricted or public
+// access to these materials which are a trade secret of Computer Associates
+// International or its subsidiaries or affiliates (together referred to as
+// CA), and which may not be reproduced, used, sold or
+// transferred to any third party without CA's prior written consent.
+//
+//                         All Rights Reserved.
+//
+//                       RESTRICTED RIGHTS LEGEND
+// Use, duplication, or disclosure by the Government is subject to
+// restrictions as set forth in subparagraph (c)(1)(ii) of the Rights in
+// Technical Data and Computer Software clause at DFARS 252.227-7013.
+////////////////////////////////////////////////////////////////////////////
+// Module:  employee/home.htmpl
+// Created: 08/09/02
+////////////////////////////////////////////////////////////////////////////
+// Description:
+//
+//   This is the default page that get loaded into the employee interface.
+//   It should contain a means of navigating to the various features
+//   that are accessible by internal employees.
+////////////////////////////////////////////////////////////////////////////
+// $Id: home.htmpl,v 1.8 2007/01/04 23:01:39 tuach01 Exp $
+//
+
+</PDM_IF>
+<PDM_PRAGMA RELEASE=110>
+<pdm_wsp preview="home.htmpl">
+<html lang="pt_BR">	<HEAD>
+<script>
+var form_title = "Início";
+</script>
+<PDM_INCLUDE FILE="std_head.htmpl">
+		<script language="JavaScript" src="$CAisd/scripts/cst_fldrtree.js"></script>		
+		<script language="JavaScript" src="$CAisd/scripts/convert_date.js"></script>	
+		<script language="JavaScript" src="$CAisd/scripts/detail_form.js"></script>	
+		<script>
+        //Need to start the suggest knowledge object even it is turned off, b/c of the scenario: "User searched for knowledge, opened document and exit"
+		if(typeof ahdtop == "object" && typeof ahdtop.ticketObj == "object")
+			ahdtop.ticketObj.isActive=1;  
+		function has_knowledge_been_checked(itilinfo)
+		{
+		if(ahdtop.checked_knowledge == false)
+		prompt_for_knowledge(itilinfo); 
+		else 
+		prompt_for_knowledge_backfill(null,itilinfo);
+		}
+		
+		function get_url_for_catalog()
+		{
+			var url="$env.NX_CATALOG_SERVER/usm/wpf?Node=iclaunchpad.pad";
+			<PDM_IF "$env.NX_USE_EIAM_AUTHENTICATION" == "Yes" && "$env.NX_EIAM_HOSTNAME" != "">
+				fetch_artifact();
+				if(artifact != ""){
+					artifact=nx_escape(artifact);
+					url += "&username=$cst.userid&eiamArtifact=" + artifact;
+				}
+			</PDM_IF>
+			popupWithURL(url,1,1);
+		}
+		
+		function call_sb_direct()
+     		{
+			var url=ahdtop.cfgCgi+
+						"?SID="+ahdtop.cfgSID+
+						"+FID="+fid_generator().toString()+
+						"+OP=CREATE_NEW" +
+						"+FACTORY=sa_user_route" +
+						"+PRESET=launch_type:3" +
+						"+PRESET=queue_id:100004" + //direct session queue
+						"+KEEP.IsPopUp=1" + 
+						"+HTMPL=detail_sa_user_route_join_session.htmpl" ;
+			
+			if (typeof sa_direct_session_code_computed != "undefined") {
+				url += "+PRESET=direct_session_code:" + sa_direct_session_code_computed; 
+			}			
+						
+			var strFeatures="directories=no"+
+						",location=no"+
+						",menubar=no"+
+						",status=no";
+			
+			preparePopup(url, "join_session", strFeatures, 550, 220, '');     		
+       		}  
+
+			function Cnote(date, text,type) { this.date = date; this.text = text; this.type=type; }
+			var arr_cnote = new Array();
+<PDM_IF "$prop.guest_user" != 1>
+//Employee User
+	<PDM_IF $cst.location == "" && $cst.organization == "" >
+    		<PDM_IF $prop.view_internal == 1> 
+  			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND (organization IS NULL AND location IS NULL)" domset=cnote_list_desc_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>
+		<PDM_ELSE>
+			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND (organization IS NULL AND location IS NULL)" domset=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>
+		</PDM_IF>
+	<PDM_ELIF $cst.location == "" && $cst.organization != "" >
+   		<PDM_IF $prop.view_internal == 1>	
+   			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((organization = U'$cst.organization') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>		
+ 		<PDM_ELSE>
+			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((organization = U'$cst.organization') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>
+   		</PDM_IF>
+   	<PDM_ELIF $cst.location != "" && $cst.organization == "" >
+   		<PDM_IF $prop.view_internal == 1>	
+   			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((location = U'$cst.location') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>		
+ 		<PDM_ELSE>
+			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((location = U'$cst.location') OR (organization IS NULL AND location IS NULL))" domset=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>
+   		</PDM_IF>
+   	<PDM_ELSE>
+  
+   		<PDM_IF $prop.view_internal == 1>	
+   			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((location IS NULL OR location = U'$cst.location') AND (organization IS NULL OR organization = U'$cst.organization'))" domset=cnote_list_desc_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>		
+ 		<PDM_ELSE>
+			<PDM_LIST prefix=list factory=cnote LENGTH=5 where="active=1 AND ((location IS NULL OR location = U'$cst.location') AND (organization IS NULL OR organization = U'$cst.organization'))" domset=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+				arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+			</PDM_LIST>
+   		</PDM_IF>
+   	</PDM_IF>	  		
+<PDM_ELSE>
+// Guest User
+	<PDM_LIST PREFIX=list FACTORY=cnote LENGTH=5 WHERE="active=1 AND (organization IS NULL AND location IS NULL)" DOMSET=cnote_list_desc_excludeinternal_static ESC_STYLE=JS2>
+		arr_cnote[arr_cnote.length] = new Cnote("$list.posted_date_INT_DATE", nx_unescape("$list.text"),"$list.cnote_type");
+	</PDM_LIST>
+</PDM_IF>  
+           	var sa_direct_session_code_computed;
+
+			
+            /* Init announcements should determine the height of the announcements table cell
+             * and set the div height to be EXACTLY that.
+             * Then
+             */
+            function ResizeCnoteCells()
+            {
+                var cell = document.getElementById("idCnoteCell");
+                var div = document.getElementById("idCnoteDiv");
+                var head = document.getElementById("idCnoteHead");
+                var body = document.getElementById("idCnoteBody");
+                //var tail = document.getElementById("idCnoteTail");
+                
+                // Commented out - We want the "Announcements and Top Solutions" section to have as much room as neccessary
+                //body.style.height = String(cell.offsetHeight - head.offsetHeight /*- tail.offsetHeight*/) + "px";
+                //div.style.height = String(cell.offsetHeight) + "px";
+            }
+            
+            function InitAnnouncements()
+            {
+				remove_exceeding_kds();
+				if (ahdtop.isSupportAutomationEnabled() && ahdtop.m_s_sa_role_id != "") {
+					check_sa_waiting_analyst();
+				}
+				
+                ResizeCnoteCells();
+                var body = document.getElementById("idCnoteBody");
+
+                for (var i = 0; i < arr_cnote.length; i++)
+                {
+                    var p = document.createElement("p");
+                   // p.style.fontSize = "0.8em";
+                    var dateText = date_to_string(arr_cnote[i].date, false);
+                    if (arr_cnote[i].type == 1) {
+                       p.className = "advisory";
+                       dateText += ahdtop.cfgIndAdvisory;
+                    }
+                    else if (arr_cnote[i].type == 2) {
+                       p.className = "emergency";
+                       dateText += ahdtop.cfgIndEmergency;
+                    }
+                    var b = document.createElement("b");
+        
+                    b.appendChild(document.createTextNode(dateText));
+                    p.appendChild(b);
+                    p.appendChild(document.createElement("br"));
+
+                    var exp = new RegExp(".*", "g");
+                    exp.multiline = true;
+                    var result = arr_cnote[i].text.match(exp);
+                    for (var j = 0; j < result.length; j++)
+                    {
+                        if (result[j].length > 0)
+                        {
+                            if (j > 0)
+                                p.appendChild(document.createElement("br"));
+                            if (result[j].match(/<*>/i))
+                            {
+                                var span = document.createElement("span");
+                                span.innerHTML = result[j];
+                                p.appendChild(span);
+                            }
+                            else 
+                                p.appendChild(document.createTextNode(result[j]));
+                        }
+                    }
+
+                    body.appendChild(p);
+                }
+                var e = document.getElementById("ebrsearch");
+                if ( e != null )
+                  e.focus();
+			}
+			
+			
+			
+			/////////////////////////////////////////////////////////////////////
+			// FUNCTION do_soln_search_from_button
+			//		Perform a keyword search by hitting the GO button
+			/////////////////////////////////////////////////////////////////////
+			function do_soln_search_from_button()
+			{
+				var keywordForm = document.forms['keywordSearch'];
+				var ebr_search_text = keywordForm.elements["QBE.IN.ebr_search_text"].value;
+				
+				if (ebr_search_text.length == 0) {
+				// Force the user to enter something
+					alertmsg("Please_enter_a_keyword_to_proc");
+					return false;					
+				}
+				else {
+					keywordForm.elements["DOMSET"].value = "KD_list_ebr_RELEVANCE";
+					keywordForm.elements["KEEP.cur_sort_key"].disabled = true;
+					keywordForm.elements["QBE.IN.ebr_search_text"].value = ebr_search_text;
+					keywordForm.elements["KEEP.categoryID"].value = "-1";
+					keywordForm.elements["KEEP.relationalID"].value = "1";
+					keywordForm.elements["KEEP.categoryPath"].value = "All";
+					
+					submit_keywordSearch_form();
+				}																																							
+			}
+			
+			
+			/////////////////////////////////////////////////////////////////////
+			// FUNCTION do_soln_search
+			//		Perform a keyword search
+			/////////////////////////////////////////////////////////////////////
+			function do_soln_search()
+			{
+				var keywordForm = document.forms['keywordSearch'];
+				var ebr_search_text = keywordForm.elements["QBE.IN.ebr_search_text"].value;
+				
+				if (ebr_search_text.length == 0) {
+					<PDM_IF "$env.NX_KT" == "Yes">		
+						keywordForm.elements["DOMSET"].value = "KD_list_web_BU_RESULT_DESC_blc";
+						keywordForm.elements["KEEP.initial_ebr"].value = "0";
+						
+						var addlWhere = "ACTIVE_STATE=0";//Since we do not want to fire index_doc)links query when selecting KDs under top
+						keywordForm.elements["ADDITIONAL_WHERE"].value = addlWhere;					
+						keywordForm.elements["KEEP.categoryID"].value = "1";
+						
+						// Disable ebr-related fields if we are not executing an ebr search
+						for ( i = keywordForm.elements.length - 1; i > 0; i-- ) {
+							var e = keywordForm.elements[i];
+							if ( e.name.match(/ebr_/)) {
+								e.disabled = true;
+							}
+						}
+						
+						keywordForm.elements["KEEP.relationalID"].value = "1";
+						keywordForm.elements["KEEP.categoryPath"].value = "All";
+					</PDM_IF>					
+				}
+				else {
+					keywordForm.elements["DOMSET"].value = "KD_list_ebr_RELEVANCE";
+					keywordForm.elements["KEEP.cur_sort_key"].disabled = true;
+					keywordForm.elements["QBE.IN.ebr_search_text"].value = ebr_search_text;
+					keywordForm.elements["KEEP.categoryID"].value = "-1";
+					keywordForm.elements["KEEP.relationalID"].value = "1";
+					keywordForm.elements["KEEP.categoryPath"].value = "All";
+				}																											
+								
+				submit_keywordSearch_form();
+			}
+			
+			function OpenDocumentViewer(doc_id)
+			{
+				// Open document in the main screen
+				var fid = fid_generator();
+				var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid + "+OP=SHOW_DETAIL+PERSID=KD:" + doc_id + "+HTMPL=kt_document_view.htmpl+opener=simple+open_mode=0+KEEP.SCROLLING=1";
+				url += "+KEEP.DOMSET=KD_list_web_BU_RESULT_DESC";
+				url += "+KEEP.cur_sort_key=BU_RESULT";
+				url += "+KEEP.initial_ebr=0";
+				document.location.href = url;	
+			}
+			
+			function viewBookmarks() {
+				var form = document.forms["keywordSearch"];
+				form.elements["DOMSET"].value = "KD_list_web_BU_RESULT_DESC";
+				form.elements["KEEP.initial_ebr"].value = "0";
+				form.elements["KEEP.from_bookmark"].value = "1";
+				form.elements["ADDITIONAL_WHERE"].value = "BM_LINKS.USER_ID=U'$cst.id' and ACTIVE_STATE=0";
+				
+				// Disable ebr-related fields if we are not executing an ebr search
+				for ( i = form.elements.length - 1; i > 0; i-- ) {
+					var e = form.elements[i];
+					if ( e.name.match(/ebr_/)) {
+						e.disabled = true;
+					}
+				}
+				
+				submit_keywordSearch_form();
+			}
+			
+			function submit_keywordSearch_form() {
+				var fid = fid_generator();
+				var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + fid;
+				var form = document.forms["keywordSearch"];
+				var search_text = "";
+				for (var i=0; i < form.elements.length; i++)
+				{
+					var element = form.elements[i];
+					if (!element.disabled)
+					{
+						var name = element.name;
+						var value = element.value;
+						url += "+" + name + "=" + nx_escape(value);
+					}
+					else if (element.name == "QBE.IN.ebr_search_text")
+					{
+						element.disabled = false;
+					}
+					if(element.name == "QBE.IN.ebr_search_text")
+					{
+						search_text = element.value;	
+					}
+				}
+				if (form.elements["KEEP.categoryID"].value == "1")
+				{
+					url += "+QBE.EQ.ebr_kcat_id=1+QBE.EQ.ebr_faq_query=1";
+				}
+				if (form.elements["KEEP.from_bookmark"].value != "1")
+				{
+					url += "+QBE.EQ.ebr_add_blc=1";
+				}
+				document.location.href = url;	
+				ahdtop.GetMyRecentSearches();
+				if(search_text.length > 0)
+					ahdtop.UpdateMyRecentSearches(search_text); 
+			}			
+			
+	    /////////////////////////////////////////////////////////////////////
+            // FUNCTION check_sa_waiting_analyst
+            //        Check whether an analyst is waiting for this user
+            /////////////////////////////////////////////////////////////////////   
+            function check_sa_waiting_analyst() {
+				var sURL = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+			   	"+OP=SA_CHECK_WAITING_ANALYST+interface=emp+end_user="+ahdtop.cstID;
+
+				AsyncAjaxCall(sURL, callback_sa_waiting_analyst);
+            }
+
+            function callback_sa_waiting_analyst (req) {
+                                var resp = req.responseText;
+
+				if (resp != "" && !resp.match(/NULL/)) {
+					sa_direct_session_code_computed = resp;
+					document.getElementById("tr_join_analyst").style.display="block";
+					show_response (msgtext("SA_Analyst_Waiting"));
+				}
+            }
+
+            function remove_exceeding_kds()
+            {
+				var tblKDs = document.getElementById("tblKDs");
+				var lFirstKDRow = "$env.NX_SD" != "Yes" ? 0 : 1;
+				if (typeof tblKDs == "object")
+				{
+					var sRow_Ids = ",";
+					var lRow=lFirstKDRow;
+					// Remove duplicated KDs
+					while (lRow < tblKDs.rows.length)
+					{
+						var sRowId = tblKDs.rows[lRow].id;
+						if (sRow_Ids.indexOf("," + sRowId + ",") != -1)	// if duplicated row
+						{
+							tblKDs.deleteRow(lRow);		// delete duplicated row
+						}
+						else
+						{
+							sRow_Ids += sRowId + ",";	// add an id to the list
+							lRow++;
+						}
+					}
+				
+					// remove exceeding KDs
+					while (tblKDs.rows.length > $prop.TOP_SOLUTION_COUNT + lFirstKDRow)
+					{
+						tblKDs.deleteRow(tblKDs.rows.length-1);
+					}
+				}
+            }
+		</script>
+		<script language="JavaScript" src="$CAisd/scripts/sitemods.js"></script>
+	</head>
+	
+	<body class=emp onunload="return close_knowledge_window();">
+	 <PDM_INCLUDE FILE=self_service_include.htmpl status=0>
+<PDM_INCLUDE FILE="std_body.htmpl">
+<br>	
+<table width="100%"   cellpadding=5>
+	<col>
+	<col style="width: 10px;">
+	<col>
+	<tr>
+		<td width="50%" height="100%" valign=top>
+						<table width="100%" cellpadding=0 cellspacing=0  >
+							<tr>
+								<td>
+									<table width='100%'   cellspacing='0' cellpadding='0'>
+								        	<tr>
+								       			<td width='4' height='22' class="hdrLeft"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+								         		<td class="hdrCenter"><h2 class='page_section_header_text'>Pesquisar solução</h2></td>
+								       			<td width='4' height='22' class="hdrRight"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+								        	</tr>
+								       </table>
+								</td>
+							</tr>
+							<tr>
+								<td class=page_section>																		
+									<table width='100%'   cellspacing='0' cellpadding='0'>
+								        <tr>
+											<td style="padding-left: 15px;">
+                                    <span class=portlet_body_text>
+									<b><label for="ebrsearch">Pesquisar solução usando palavras-chave</label>:</b><br>
+									</span>	
+											</td>
+										</tr>
+									</table>							
+<PDM_FORM name="keywordSearch" onsubmit="do_soln_search_from_button(); return false;">									
+									<nobr>
+										<input type="hidden" name="OP" value="SEARCH">
+										<input type="hidden" name="FACTORY" value="KD">
+										<input type="hidden" name="HTMPL" value="list_KD.htmpl">
+										<input type="hidden" name="DOMSET" value="">
+										<input type="hidden" name="ADDITIONAL_WHERE" value="ACTIVE_STATE=0">
+										
+										<PDM_IF "$prop.EBR_SEARCH_DEF_MODE" == "1">
+											<input type="hidden" name="QBE.EQ.ebr_search_type" value="NLS">
+										<PDM_ELSE>				
+											<input type="hidden" name="QBE.EQ.ebr_search_type" value="KEYWORDS">
+										</PDM_IF>
+										
+										<PDM_IF "$prop.EBR_SEARCH_OR_AND_EXACT" == "2">
+											<input type="hidden" name="QBE.EQ.ebr_match_type" value="ALL">
+										<PDM_ELIF "$prop.EBR_SEARCH_OR_AND_EXACT" == "3">
+											<input type="hidden" name="QBE.EQ.ebr_match_type" value="EXACT">
+										<PDM_ELSE>
+											<input type="hidden" name="QBE.EQ.ebr_match_type" value="ANY">
+										</PDM_IF>
+										
+										<input type="hidden" name="QBE.EQ.ebr_search_in" value="$prop.EBR_SEARCH_FIELDS">
+										<input type="hidden" name="QBE.EQ.ebr_fuzziness" value="MINI">
+										<input type="hidden" name="QBE.EQ.ebr_order" value="RELEVANCE">
+										<input type="hidden" name="QBE.EQ.ebr_primary_order" value="RELEVANCE">
+										<input type="hidden" name="QBE.EQ.ebr_order_direction" value="DESC">
+										<input type="hidden" name="KEEP.cur_sort_key" value="BU_RESULT">
+										<input type="hidden" name="KEEP.categoryRadio" value="checked">
+										<input type="hidden" name="KEEP.categoryID" value="-1">
+										<input type="hidden" name="KEEP.relationalID" value="1">
+										<input type="hidden" name="KEEP.categoryPath" value="All">									
+										<input type="hidden" name="KEEP.initial_ebr" value="1">
+										<input type="hidden" name="KEEP.resume_ticket" value="0">
+										<input type="hidden" name="KEEP.itilinfo" value="0">										
+										<input type="hidden" name="KEEP.from_bookmark" value="0">
+										<BR>
+										<TABLE>
+										<TR>
+										<TD></TD><TD></TD><TD></TD>
+										<TD>
+										<input type="text" size=35 id="ebrsearch" name="QBE.IN.ebr_search_text" onfocus="this.className='focusField';" onblur="this.className='';">
+										<PDM_IF "$env.NX_SUPPRESS_FAQ_COUNT_CST_EMP_UI" == "0">
+											<input type="hidden" value="0" name="NO_COUNT">
+										<PDM_ELSE>
+											<input type="hidden" value="1" name="NO_COUNT">
+										</PDM_IF>																														
+										</TD>
+										<TD>
+											<SCRIPT>
+												ImgBtnCreate("btn1", "Go[G]", "javascript:do_soln_search_from_button();",true,0,"Pesquisar uma solução usando palavras-chave");
+											</SCRIPT>
+										</TD>
+										</TR>
+										</TABLE>
+									</nobr>
+									
+</PDM_FORM>																						
+<PDM_IF "$env.NX_KT" == "Yes" && "$prop.guest_user" != 1>
+							<table width="100%" cellpadding=0 cellspacing=0  >	
+							<td style="padding-left: 15px;">							
+							<SCRIPT LANGUAGE="Javascript">						
+								// Do not display a link to view Bookmarks unless the user has permissions to add bookmarks
+								if (ahdtop.CanUserPerformAction("ROLE_BOOKMARKS")) {									
+									document.writeln("<a class=emp href='javascript:viewBookmarks()'>Meus indicadores</a><br>");									
+								}
+							</SCRIPT>
+							</TD>
+							</TABLE>
+</PDM_IF>
+<PDM_IF "$prop.guest_user" != 1>
+							<table width="100%" cellpadding=0 cellspacing=0  >	
+							<td style="padding-left: 15px;">
+							<SCRIPT LANGUAGE="Javascript">
+								// Do not display a link to submit knowledge unless the user has the proper permissions
+								if (ahdtop.CanUserPerformAction("ROLE_SUBMIT_KNOWLEDGE")) {
+									// Dont show the attachment field if the user does not have the proper permission
+									if (ahdtop.CanUserPerformAction("ROLE_SUBMIT_KNOWLEDGE_ATTACHMENTS")){
+										var iCanAttach = 1;								
+									}
+									else{
+										var iCanAttach = 0;
+									}
+									document.writeln("<a class=emp href='" + cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID + "+OP=CREATE_NEW+FACTORY=KD+KEEP.ATTACHMENT=" + iCanAttach + "'>Enviar conhecimento</a>");									
+								}
+							</SCRIPT>
+							</TD>
+							</TABLE>
+</PDM_IF>
+							</td>
+							</tr>
+<PDM_IF "$env.NX_SD" != "Yes">
+							<tr>
+								<td class=page_section>
+									<table   cellspacing=0 cellpadding=0 width="100%">
+										<tr>
+											<th class="'emp' 'font_normal'" style="padding: 2px 5px 2px 5px;">
+												Top Solutions
+												&nbsp;&nbsp;
+												<b>(</b><a href="javascript:document.forms['keywordSearch'].elements['QBE.IN.ebr_search_text'].value='';do_soln_search();"
+												        class='emp'										
+														onmouseover='window.status = "Procurar mais soluções e favoritos";'
+														onmouseout="window.status = window.defaultStatus;">Procurar mais soluções</a><b>)</b>
+											</th>
+										</tr>
+									</table>
+								</td>
+							</tr>
+							<tr>
+								<td class=page_section>
+									<table   cellspacing=0 cellpadding=3 width="100%" class="table" id="tblKDs">		
+										<PDM_LIST PREFIX=blc_list $prop.BLC_MAX_COUNT WHERE="BLC_TYPE=4 and KCAT=1 and KD.ACTIVE_STATE=0" FACTORY="KT_BLC">
+											<tr CLASS="'results0' 'font_normal'" id='$blc_list.KD'>
+												<td >
+													<div style="padding-left: 15px; padding-right: 5px;">
+														<span class=gn_highlight_recommended_text>
+															<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=NONE disp_entities="yes">Recomendado</PDM_FMT>&nbsp;
+														</span>
+														<a class='emp' href="javascript:OpenDocumentViewer('$blc_list.KD')">
+															<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=NONE disp_entities="yes">$blc_list.KD.TITLE</PDM_FMT>
+														</a>
+													</div>
+												</td>
+											</tr>
+										</PDM_LIST>
+										<PDM_IF "$args.FAQIDs" != "">
+											<PDM_LIST PREFIX=list LENGTH=$prop.TOP_SOLUTION_COUNT WHERE="id in ($args.FAQIDs)" ORDER_BY="BU_RESULT DESC, MODIFY_DATE DESC" FACTORY="KD">
+												<tr CLASS="'results0' 'font_normal'" id='$list.id'>
+													<td>
+														<div style="padding-left: 15px; padding-right: 5px;">
+															<a class='emp' href="javascript:OpenDocumentViewer('$list.id')">
+																<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=NONE disp_entities="yes">$list.TITLE</PDM_FMT>
+															</a>
+														</div>
+													</td>
+												</tr>
+											</PDM_LIST>
+										</PDM_IF>
+									</table>
+								</td>
+							</tr>
+</PDM_IF>								
+<PDM_IF "$env.NX_URL_ETRUST_PASSWORD_RESET" != "">
+				<tr>
+					<td class=page_section>
+						<table>
+							<tr>
+								<th class=emp>Redefinir minha senha usando o eTrust</th>
+							</tr>
+							<tr>
+								<td style="padding-left: 15px;">
+									<a href="JavaScript: void(0);"
+									   class=emp
+									   onclick="popupWithURL('$env.NX_URL_ETRUST_PASSWORD_RESET', 1);"
+									   onmouseover='window.status = "Exibir pop-up do formulário principal de redefinição de senha do eTrust"; return true;'
+									   onmouseout="window.status = window.defaultStatus; return true;">
+										Usar o eTrust Admin para redefinir minha senha
+									</a>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+</PDM_IF>
+
+				<PDM_IF "$env.NX_KT" == "Yes">
+				<tr>
+					<td>						
+                        <br>
+						<table   cellspacing=0 cellpadding=0 width="100%">
+							<tr>
+								<td width='4' height='22' class="hdrLeft"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+								<td class="hdrCenter"><h2 class='page_section_header_text'>Principais soluções</he></td>
+								<td width='4' height='22' class="hdrRight"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+							</tr>
+						</table>						
+					</td>
+				</tr>
+				<tr>
+					<td class=page_section valign=top height="100%">
+						<table   cellspacing=1 cellpadding=3 width="100%" class=table id="tblKDs">
+							<tr class="'results1' 'font_normal'">
+								<td>							
+										<div id="idTop" align=right>
+										<b>(</b><a href="javascript:document.forms['keywordSearch'].elements['QBE.IN.ebr_search_text'].value='';do_soln_search();"
+												class='emp'										
+												onmouseover='window.status = "Procurar mais soluções";'
+												onmouseout="window.status = window.defaultStatus;">Procurar mais soluções</a><b>)</b>
+										</div>
+								</td>
+							</tr>
+								<PDM_LIST PREFIX=blc_list LENGTH=$prop.BLC_MAX_COUNT WHERE="BLC_TYPE=4 and KCAT=1 and KD.ACTIVE_STATE=0" FACTORY="KT_BLC">
+								<tr class="'results1' 'font_normal'" id='$blc_list.KD'>
+									<td>
+										<div style="padding-left: 15px; padding-right: 5px;">
+											<span class='gn_highlight_recommended_text'>
+												<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=NONE disp_entities="yes">Recomendado</PDM_FMT>&nbsp;
+											</span>
+											<a class='emp' href="javascript:OpenDocumentViewer('$blc_list.KD')">
+												<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=NONE disp_entities="yes">$blc_list.KD.TITLE</PDM_FMT>
+											</a>
+										</div>
+									</td>
+								</tr>
+								</PDM_LIST>
+								<PDM_IF "$args.FAQIDs" != "">
+									<PDM_LIST PREFIX=list LENGTH=$prop.TOP_SOLUTION_COUNT WHERE="id in ($args.FAQIDs)" ORDER_BY="BU_RESULT DESC, MODIFY_DATE DESC" FACTORY="KD">
+									<tr class="'results1' 'font_normal'" id='$list.id'>
+										<td>
+											<div style="padding-left: 15px; padding-right: 5px;">
+												<a class='emp' href="javascript:OpenDocumentViewer('$list.id')">
+													<PDM_FMT JUSTIFY=TRUNCATE WIDTH=80 ESC_STYLE=NONE disp_entities="yes">$list.TITLE</PDM_FMT>
+												</a>
+											</div>
+										</td>
+									</tr>
+									</PDM_LIST>
+								</PDM_IF>
+						</table>
+					</td>
+				</tr>	
+				</PDM_IF>
+			</table>
+		</td>
+<PDM_IF "$env.NX_SD" == "Yes">	
+		<td class=emp width="10px"></td>
+		<td class=emp valign=top height="100%">
+			<table   width="100%" height="100%" cellpadding=0 cellspacing=0>
+<PDM_IF "$env.NX_SD" == "Yes">
+				<tr>
+					<td>								
+						<table width='100%'   cellspacing='0' cellpadding='0'>
+								<tr>
+								    <td width='4' height='22' class="hdrLeft"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+								    <td class="hdrCenter"><h2 class='page_section_header_text'>Atendimento ao cliente</h2></td>
+								    <td width='4' height='22' class="hdrRight"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+								</tr>
+							</table>
+					</td>											
+				</tr>
+				<tr>
+					<td class=page_section>
+							<table width="100%" cellpadding=0 cellspacing=0  >
+							
+<PDM_IF "${args.ref_num:}" != "" && "${args.ticket_avoided:}" != "30">
+							<tr>
+								<td style="padding-left: 15px;">
+<PDM_IF "$args.FROM_EMP_DETAIL_IN" == "1">		
+		<PDM_LINK OP="SHOW_DETAIL"
+				  PERSID="$args.persistent_id"
+				  onmouseover="window.status = &quot;Exibir chamado nº $args.ref_num&quot;; return true;"
+				  onmouseout="window.status = window.defaultStatus; return true;">	
+		
+		<span class="alertmsg portlet_body_text">Chamado $args.chg_ref_num criado. Clique aqui para exibir.</span></PDM_LINK>				  
+<PDM_ELSE>									
+		<PDM_LINK OP="SHOW_DETAIL"
+				  PERSID="$args.persistent_id"
+				  onmouseover="window.status = &quot;Exibir solicitação #$args.ref_num&quot;; return true;"
+				  onmouseout="window.status = window.defaultStatus; return true;">
+				  
+ 		<span class="alertmsg portlet_body_text">Chamado $args.chg_ref_num criado. Clique aqui para exibir.</span></PDM_LINK>				  
+</PDM_IF>		          
+		  						</td>
+							</tr>
+<PDM_ELIF "${args.chg_ref_num:}" != "">
+							<tr>
+								<td style="padding-left: 15px;">
+<PDM_LINK OP="SHOW_DETAIL"
+		  PERSID="$args.persistent_id"
+		  onmouseover="window.status = &quot;Exibir requisição de mudança #$args.chg_ref_num&quot;; return true;"
+		  onmouseout="window.status = window.defaultStatus; return true;">
+          <span class="alertmsg portlet_body_text">Requisição de mudança $args.chg_ref_num criado. Clique aqui para exibir.</span></PDM_LINK>
+		  						</td>
+							</tr>							
+</PDM_IF>
+
+<PDM_FORM class=emp name="frmOpenNew">
+										<input type="hidden" name="OP" value="CREATE_NEW">
+										<input type="hidden" name="FACTORY" value="cr">
+										<input type="hidden" name="CREATE_ALG" value="LOG">
+										<input type="hidden" name="ALG_PRESET" value="description">
+										<input type="hidden" name="PRESET" value="">										
+<!--
+depending on the the value of the option
+ NX_EMPLOYEE_INTF_INCIDENT_SUPPORT/NX_GUEST_INTF_INCIDENT_SUPPORT
+installed you will get request and/or incident
+-->	
+<!--variable to send to link	- "Live Chat" to identify the ticket type  in/cr/iss-->
+<script>var m_sTicketType = ""; </script>							
+
+<PDM_IF "$prop.guest_user" != "1">
+		 <tr>
+			 <td style="padding-left: 15px;">										
+				<a href="javascript: has_knowledge_been_checked();"
+									   class="emp portlet_body_text"
+				   onmouseover='window.status = "Criar chamado"; return true;'
+				   onmouseout="window.status = window.defaultStatus; return true;">Criar chamado</a>
+				<PDM_IF "$env.NX_EMPLOYEE_INTF_INCIDENT_SUPPORT" != "IncidentandRequest" && "$env.NX_CATALOG_SERVER" != "">
+					<span style="padding-left: 30px;">
+						<a href="javascript:get_url_for_catalog();"
+									   class="emp portlet_body_text"
+							onmouseover='window.status = "Procurar serviços do catálogo"; return true;'
+							onmouseout="window.status = window.defaultStatus; return true;"><img align="absmiddle" alt='' src="$CAisd/img/shopping_cart.png"></img>Procurar serviços do catálogo</a>
+					</span>					
+				</PDM_IF>
+			</td>
+		</tr>
+		<script>m_sTicketType = "in"; </script>		
+<PDM_ELSE>
+		 <tr>
+			 <td style="padding-left: 15px;">										
+				<a href="javascript: has_knowledge_been_checked();"
+									   class="emp portlet_body_text"
+				   onmouseover='window.status = "Criar chamado"; return true;'
+				   onmouseout="window.status = window.defaultStatus; return true;">Criar chamado</a>
+				<PDM_IF "$env.NX_GUEST_INTF_INCIDENT_SUPPORT" != "IncidentandRequest" && "$env.NX_CATALOG_SERVER" != "">
+					<span style="padding-left: 30px;">
+						<a href="javascript:get_url_for_catalog();"
+									   class="emp portlet_body_text"
+						   onmouseover='window.status = "Procurar serviços do catálogo"; return true;'
+						   onmouseout="window.status = window.defaultStatus; return true;"><img align="absmiddle" alt='' src="$CAisd/img/shopping_cart.png"></img>Procurar serviços do catálogo</a>
+					</span>					
+				</PDM_IF>
+			</td>
+		</tr>	
+		<script>m_sTicketType = "in"; </script>
+</PDM_IF>																																
+																			   	
+</form>
+
+<PDM_IF "$ACCESS.FAC_chg" \> 1>	
+	<tr>
+	<td style="padding-left: 15px;">
+	    <PDM_LINK OP=CREATE_NEW FACTORY=chg class="emp portlet_body_text" onmouseover="window.status = &quot;Criar uma requisição de mudança&quot;; return true;" onmouseout="window.status = window.defaultStatus; return true;">Criar uma requisição de mudança</PDM_LINK>
+	</td>
+	</tr>
+</PDM_IF>
+<script>
+
+
+if( ahdtop.isSupportAutomationEnabled() && ahdtop.m_s_sa_role_id !="" )
+{
+	document.writeln("<tr id='tr_join_analyst'>")
+	document.writeln("<td style='padding-left: 15px;'>");
+	document.writeln("<a href=\"javascript: call_sb_direct();\" class=emp onmouseover='window.status = \"Incluir analista agora\"; return true;' onmouseout=\"window.status = window.defaultStatus; return true;\">Incluir analista agora</a>");
+	document.writeln("</td> </tr>");
+
+	if (typeof ahdtop.m_sa_display_join_analyst_now == "undefined" || !ahdtop.m_sa_display_join_analyst_now) {	
+		document.getElementById("tr_join_analyst").style.display="none";
+	}
+	if (ahdtop.m_sa_display_live_chat_link) {
+		document.writeln("<tr>");
+		document.writeln("<td style='padding-left: 15px;'>");
+		document.writeln("<a href=\"javascript: live_chat_link(m_sTicketType,1);\" class=emp onmouseover='window.status = \"Bate-papo online\"; return true;' onmouseout=\"window.status = window.defaultStatus; return true;\">Bate-papo online</a>");
+		document.writeln("</td> </tr>");
+		document.writeln("<tr> <td style='padding-left: 15px;'></td> </tr>");    
+		document.writeln("<tr> <td style='padding-left: 15px;'></td> </tr>");    
+		document.writeln("<tr> <td style='padding-left: 15px;'></td> </tr>");    
+		document.writeln("<tr> <td style='padding-left: 15px;'></td> </tr>");   
+	}
+}
+</script>
+
+							<tr>
+									<td style="padding-left: 15px;">
+<PDM_LINK OP="DISPLAY_FORM"
+	  HTMPL="about.htmpl"
+	  class="emp portlet_body_text"
+	  onmouseover="window.status = &quot;Sobre&quot;; return true;"
+	  onmouseout="window.status = window.defaultStatus; return true;">Informações de contato e horário de funcionamento do Service Desk</PDM_LINK>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+</PDM_IF>				
+<PDM_IF "$prop.guest_user" != "1" && "$env.NX_SD" == "Yes">
+				
+				<tr>
+					<td>
+                        <br>
+						<table width="100%" cellpadding=0 cellspacing=0  >
+							<tr>
+								<td>								
+									<table width='100%'   cellspacing='0' cellpadding='0'>
+								        	<tr>
+								       			<td width='4' height='22' class="hdrLeft"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+								         		<td class="hdrCenter"><h2 class='page_section_header_text'>Procurar meus tickets existentes</h2></td>
+								       			<td width='4' height='22' class="hdrRight"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+								        	</tr>
+								       </table>
+								</td>											
+							</tr>
+							<tr>
+								<td class=page_section>
+									<table width='100%'   cellspacing='0' cellpadding='0'>
+								        <tr>
+											<td style="padding-left: 15px;">
+<PDM_SCOREBOARD>
+											</td>
+										</tr>
+									</table>
+									<BR>
+									<table   width="100%" cellpadding=5 cellspacing=0>
+										<tr>
+											<td COLSPAN=2 style="padding-left: 15px;">
+												<span class="portlet_body_text">
+												<b>Se você souber o número, insira-o:</b>
+												</span>
+											</td>
+										</tr>
+										
+		
+<!--
+ depending on the the value of the option
+ NX_EMPLOYEE_INTF_INCIDENT_SUPPORT installed you will get request and/or incident
+-->			
+										<tr>
+											<td style="padding-left: 15px;">
+												<span class="portlet_body_text">
+															<b>Número do chamado:</b>
+												</span>
+								<PDM_FORM class=emp name="frmSearchInc" onsubmit="return doSearchInc();">
+										<input type="hidden" name="OP" value="SEARCH">
+										<input type="hidden" name="FACTORY" value="z_cr">
+										<input type="hidden" name="SKIPLIST" value="1">
+										<input type="hidden" name="QBE.EQ.ref_num" value="">
+										<nobr>
+										<TABLE>
+										<TR>
+										<TD>
+										<input type="text" id="incnum" name="number" title="Número do chamado" onfocus="this.className='focusField';" onblur="this.className='';">
+										</TD>
+										<TD>
+											<SCRIPT>
+												ImgBtnCreate("btn2", "Go[G]", "javascript: (doSearchInc() == true ? document.forms['frmSearchInc'].submit() : void(0))",true,0,"O acesso rápido exibe o chamado especificado");
+											</SCRIPT>
+										</TD>
+										</TR>
+										</TABLE>
+										</nobr>
+									</PDM_FORM>
+											</td>
+										</tr>							
+			
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+</PDM_IF>
+
+				<tr>
+					<td>
+                        <br>
+						<div id="idCnoteHead">
+							<table   cellspacing=0 cellpadding=0 width="100%">
+								<tr>
+									<td width='4' height='22' class="hdrLeft"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+									<td class="hdrCenter"><h2 class='page_section_header_text'>Anúncios</h2></td>
+									<td width='4' height='22' class="hdrRight"><img alt='' src='/CAisd/img/spacer.png' width='4' height='22'></td>
+								</tr>
+							</table>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td class=page_section id="idCnoteCell" valign=top height="100%">
+						<div id="idCnoteDiv">							
+							<div id="idCnoteBody" class="portlet_body_text" style="overflow: auto; padding-left: 15px; padding-right: 5px;">
+							</div>
+		<div id="idCnotelink" align=right>					
+		<b>(</b><PDM_LINK OP="DISPLAY_FORM"
+		  HTMPL="bin_form_np.htmpl"
+		  id="idMoreCnote"
+		  class=emp
+		  onmouseover="window.status = &quot;Mais anúncios&quot;; return true;"
+		  onmouseout="window.status = window.defaultStatus; return true;">Mostrar todos os anúncios</PDM_LINK><b>)</b>
+		  </div>
+<script>
+	if (! _browser.supportsDOM)
+	{
+		for (var e = 0; e < arr_cnote.length; e++)
+			document.writeln("<p><b>" + date_to_string(arr_cnote[e].date, false) + "</b><br>" + arr_cnote[e].text + "</p>");
+	}
+	else
+	{
+		window.onload = InitAnnouncements;
+	}
+</script>
+						</div>
+					</td>
+				</tr>
+
+			</table>
+		</td>
+				
+</PDM_IF>
+	</tr>
+</table>
+<PDM_INCLUDE FILE="std_footer.htmpl">
+<SCRIPT>
+//Reset suggest knowledge when getting to home.htmpl for any reason
+if ( typeof ahdtop.ticketObj != "undefined" )
+	ahdtop.ticketObj.resetTicket();
+</SCRIPT>
+	</body>
+	
+</html>
