@@ -146,6 +146,7 @@ ADD apprule
 ADD cnt
 ADD delete_flag
 ADD grp
+ADD ntfl
 ADD sequence
 ADD tipoaprovador
 END

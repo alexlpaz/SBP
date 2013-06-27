@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp.mods
-// Data de publicação: 27/06/2013 12:29:37
+// Data de publicação: 27/06/2013 14:32:20
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -616,8 +616,9 @@ OBJECT zmodpasso {
     delete_flag INTEGER
       REQUIRED;
     grp SREL grp;
+    ntfl SREL ntfl;
     sequence INTEGER;
-    tipoaprovador SREL ztipoaprovador;
+    tipoaprovador SREL ztipoaprovador; // SRel_Attr_Entry zmodpasso.tipoaprovador
     last_mod_dt DATE { ON_CI SET NOW; };
     last_mod_by SREL cnt { ON_CI SET USER;
                            ON_NEW DEFAULT USER; };
@@ -697,6 +698,7 @@ OBJECT ztipoaprovador {
 
 ////////////////////////////////////////////////////////////////////////
 // Fábrica:   ztransfcode (Códigos de encaminhamento)
+// Descrição: Fac_Attr_Entry ztransfcode
 ////////////////////////////////////////////////////////////////////////
 
 OBJECT ztransfcode {
@@ -727,5 +729,6 @@ OBJECT ztransfcode {
       RLIST OFF;
     };
     REL_ATTR id;
+    COMMON_NAME sym;
   };
 };

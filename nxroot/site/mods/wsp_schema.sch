@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_schema.sch
-// Data de publicação: 27/06/2013 12:29:37
+// Data de publicação: 27/06/2013 14:32:20
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -220,8 +220,9 @@ TABLE zmodpasso {
   cnt	UUID REF ca_contact;
   delete_flag	INTEGER;
   grp	UUID REF ca_contact;
+  ntfl	INTEGER REF Notify_Object_Attr;
   sequence	INTEGER;
-  tipoaprovador	INTEGER REF ztipoaprovador;
+  tipoaprovador	INTEGER REF ztipoaprovador;// SRel_Attr_Entry zmodpasso.tipoaprovador
 }
 
 p1 zmodpasso -> CURR_PROV zmodpasso;
