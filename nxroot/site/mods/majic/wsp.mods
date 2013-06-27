@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp.mods
-// Data de publicação: 26/06/2013 14:50:32
+// Data de publicação: 27/06/2013 10:40:52
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -61,6 +61,7 @@ OBJECT cr {
       ON_NEW DEFAULT 0;
       };
     z_int_sla_viol_atend INTEGER;
+    z_int_slo INTEGER;
     z_srl_cr SREL cr
       
       DISPLAY_NAME "Chamado relacionado";

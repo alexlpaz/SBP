@@ -1,0 +1,575 @@
+////////////////////////////////////////////////////////////////////////
+// Module:      z_cria_ciclo_vida.spl
+// Author:      Marcos Strapazon
+// Created:     Wednesday, February 17, 2010 4:11:09 PM
+////////////////////////////////////////////////////////////////////////
+cr::z_inicio_ciclo_vida(...){  
+
+    int zi,zi_depurar;
+    string zs_metodo;
+    zs_metodo = 'z_inicio_ciclo_vida - ';
+
+    // Alterar valor zi_depurar parar 1 para debug mode
+    zi_depurar = 1;
+    
+    logf(SIGNIFICANT, "%s Inicio - %s", zs_metodo, now());
+    // Entrada para debug mode
+    if ( zi_depurar==1 ) { 
+        logf(SIGNIFICANT, "============================================================="); 
+        logf(SIGNIFICANT, "%s Inicio - %s", zs_metodo, now()); 
+        logf(SIGNIFICANT, "%s ARG Count : %d", zs_metodo, argc);
+        logf(SIGNIFICANT, "%s User      : %s", zs_metodo, thread_userid());
+        for (zi=0; zi<argc; zi+=1) {
+            logf(SIGNIFICANT, "%s ARG #%s : %s", zs_metodo, (string) zi, (string) argv[zi]);          
+        } ;
+        logf(SIGNIFICANT, "============================================================="); 
+    } ; 
+    
+    string z_incidente,z_status,zs_work_svc,zs_workshift, z_categoria;
+    uuid z_grupo, z_resp;
+    int z_tempo;
+    object cr;
+    
+    z_incidente = argv[3];
+    z_grupo = argv[6];
+    z_status = argv[9];
+    z_tempo = argv[12];
+    z_resp = argv[15];
+    z_categoria = argv[18];
+    if(is_null(z_grupo)){
+    sleep(3);
+        send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, z_incidente);
+  	if ( msg_error() ) {
+  		logf(ERROR, "%s Erro ao instanciar cr: %s", zs_metodo, msg[0]);
+  		bloco_fim(depurar, zs_metodo);
+  		return;
+  	} ;
+  	cr = msg[0] ;
+  	z_grupo = cr.group;
+  	z_tempo = cr.time_spent_sum;
+    zs_work_svc = cr.category.service_type.schedule;
+    if(is_null(zs_work_svc)){
+        zs_work_svc = 'wrkshft:4600';    
+    }
+    
+    zs_workshift = 'wrkshft:4602';
+  	if(is_null(z_grupo)){
+    sleep(30);
+            send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, z_incidente);
+  	if ( msg_error() ) {
+  		logf(ERROR, "%s Erro ao instanciar cr: %s", zs_metodo, msg[0]);
+  		bloco_fim(depurar, zs_metodo);
+  		return;
+  	} ;
+  	cr = msg[0] ;
+  	z_grupo = cr.group;
+  	z_tempo = cr.time_spent_sum;
+    zs_work_svc = cr.category.service_type.schedule;
+    if(is_null(zs_work_svc)){
+        zs_work_svc = 'wrkshft:4600';    
+    }
+    
+    zs_workshift = 'wrkshft:4602';  	
+  	  	if(is_null(z_grupo)){
+    sleep(30);
+    }
+    }
+    }
+    z_cria_novo_ciclo_vida(z_incidente,z_grupo,z_status,z_tempo,zs_workshift,zs_work_svc,z_resp,z_categoria);
+}
+
+cr::z_encerra_ciclo_vida(...){
+
+	sleep(5);
+
+        int zi, zi_depurar;
+    	string zs_metodo;
+    	zs_metodo = 'z_encerra_ciclo_vida - ';
+    
+        // Alterar valor zi_depurar parar 1 para debug mode
+        zi_depurar = 1;
+            
+        // Entrada para debug mode
+        if ( zi_depurar==1 ) { 
+            logf(SIGNIFICANT, "============================================================="); 
+            logf(SIGNIFICANT, "%s Inicio", zs_metodo); 
+            logf(SIGNIFICANT, "%s ARG Count : %d", zs_metodo, argc);
+            for (zi=0; zi<argc; zi+=1) {
+                logf(SIGNIFICANT, "%s ARG #%s : %s", zs_metodo, (string) zi, (string) argv[zi]);          
+            } ;
+            logf(SIGNIFICANT, "============================================================="); 
+        } ;  
+        
+    string z_incidente,z_status,zs_workshift, zs_work_svc, z_categoria;
+    uuid z_responsavel, z_grupo;
+    object cr;
+    date z_op_dt, z_cl_dt;
+    int z_tempo;
+    
+    z_incidente = argv[3];
+    z_responsavel = argv[6];
+    z_grupo = argv[9];
+    z_status = argv[12];
+    z_op_dt = argv[15];
+    z_cl_dt = argv[18];
+    z_categoria = argv[24];
+    
+
+    send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, z_incidente);
+  	if ( msg_error() ) {
+  		logf(ERROR, "%s Erro ao instanciar cr: %s", zs_metodo, msg[0]);
+  		bloco_fim(depurar, zs_metodo);
+  		return;
+  	} ;
+  	cr = msg[0] ;
+
+    zs_work_svc = cr.category.service_type.schedule;
+    if(is_null(zs_work_svc)){
+        zs_work_svc = 'wrkshft:4600';    
+    }
+    
+    zs_workshift = 'wrkshft:4602';
+    z_tempo = cr.time_spent_sum;
+    if ( zi_depurar==1 ) logf(SIGNIFICANT,"%s O tempo considerado e %s",zs_metodo,z_tempo);
+    if ( zi_depurar==1 ) logf(SIGNIFICANT,"%s Os Turnos de Trabalho sao: %s - %s",zs_metodo,zs_workshift,zs_work_svc);
+
+
+
+    z_atualiza_ultimo_ciclo_vida(z_incidente,z_responsavel,z_status,zs_workshift,zs_work_svc, z_op_dt, z_cl_dt, z_tempo, (uuid) 0, 1, z_categoria);
+    if(!is_null(z_grupo)){
+    z_cria_novo_ciclo_vida(z_incidente,z_grupo,z_status,z_tempo,zs_workshift,zs_work_svc,z_responsavel,z_categoria);
+    }
+}
+
+cr::z_transfere_ciclo_vida(...){
+
+
+        int zi, zi_depurar;
+    	string zs_metodo;
+    	zs_metodo = 'z_transfere_ciclo_vida - ';
+    
+        // Alterar valor zi_depurar parar 1 para debug mode
+        zi_depurar = 1;
+            
+        // Entrada para debug mode
+        if ( zi_depurar==1 ) { 
+            logf(SIGNIFICANT, "============================================================="); 
+            logf(SIGNIFICANT, "%s Inicio", zs_metodo); 
+            logf(SIGNIFICANT, "%s ARG Count : %d", zs_metodo, argc);
+            for (zi=0; zi<argc; zi+=1) {
+                logf(SIGNIFICANT, "%s ARG #%s : %s", zs_metodo, (string) zi, (string) argv[zi]);          
+            } ;
+            logf(SIGNIFICANT, "============================================================="); 
+        } ;  
+
+
+    string z_incidente,z_status,zs_workshift, zs_work_svc, z_categoria; 
+    uuid z_responsavel,z_grupo, z_responsavel_anterior;
+    object cr;
+    date z_op_dt, z_cl_dt;
+    int z_tempo;
+        
+    z_incidente = argv[3];
+    z_responsavel_anterior = argv[5];
+    z_responsavel = argv[6];
+    z_grupo = argv[9];
+    z_status = argv[12];
+    z_op_dt = argv[15];
+    z_cl_dt = argv[18];
+    z_categoria = argv[21];
+    z_tempo = 0;
+    
+    send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, z_incidente);
+  	if ( msg_error() ) {
+  		logf(ERROR, "%s Erro ao instanciar cr: %s", zs_metodo, msg[0]);
+  		bloco_fim(depurar, zs_metodo);
+  		return;
+  	} ;
+  	cr = msg[0] ;
+
+    zs_work_svc = cr.category.service_type.schedule;
+    if(is_null(zs_work_svc)){
+        zs_work_svc = 'wrkshft:4600';    
+    }
+    
+    zs_workshift = 'wrkshft:4602';
+
+
+    
+    if ( zi_depurar==1 ) logf(SIGNIFICANT,"%s Os Turnos de Trabalho sao: %s - %s",zs_metodo,zs_workshift,zs_work_svc);
+
+    if (!is_null(z_responsavel_anterior)) {
+    	z_atualiza_ultimo_ciclo_vida(z_incidente,z_responsavel,z_status,zs_workshift,zs_work_svc,z_op_dt, z_cl_dt, z_tempo, z_grupo,0, z_categoria);
+    } else {
+    	z_atualiza_ultimo_ciclo_vida(z_incidente,(uuid) "00",z_status,zs_workshift,zs_work_svc,z_op_dt, z_cl_dt, z_tempo, z_grupo, 1, z_categoria);
+    } ;
+    z_cria_novo_ciclo_vida(z_incidente,z_grupo,z_status,z_tempo,zs_workshift,zs_work_svc,z_responsavel,z_categoria);
+
+}
+
+
+
+z_cria_novo_ciclo_vida(string incidente,uuid grupo,string status, int tempo_tot, string zs_workshift, string zs_work_svc, uuid z_resp, string categoria){
+
+
+    int zi,zi_depurar;
+    string zs_metodo;
+    zs_metodo = 'z_cria_novo_ciclo_vida - ';
+
+    // Alterar valor zi_depurar parar 1 para debug mode
+    zi_depurar = 1;    
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Inicio do codigo
+
+    object grp;
+    string grp_persid, zs_work_grp;
+    
+    
+    grp_persid  = format("cnt:%s",grupo );
+
+    send_wait (0, top_object(), "call_attr", "cnt", "dob_by_persid", NULL, grp_persid);
+  	if ( msg_error() ) {
+  		logf(ERROR, "%s Erro ao instanciar cnt: %s", zs_metodo, msg[0]);
+  		bloco_fim(depurar, zs_metodo);
+  		return;
+  	} ;
+  	grp = msg[0] ;
+    zs_work_grp = grp.schedule;
+    if(is_null(zs_work_grp)){
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s entrou aqui???????", zs_metodo ); } ;	
+              zs_work_grp = 'wrkshft:4600';    
+    }        
+
+        string zs_wc2;
+        object zo_list2;
+        int zi_num2;
+        zs_wc2 = format("z_srl_cr = '%s'",incidente );
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lista de ciclo_vida: '%s'", zs_metodo,  zs_wc2); } ;        
+        send_wait( 0, top_object(), "call_attr", "z_cr_slo", "sync_fetch",  "STATIC", zs_wc2, -1, 0);
+        if ( msg_error() ) {
+            sleep(10);
+            send_wait( 0, top_object(), "call_attr", "z_cr_slo", "sync_fetch",  "STATIC", zs_wc2, -1, 0);
+            if ( msg_error() ) {
+                sleep(10);
+                send_wait( 0, top_object(), "call_attr", "z_cr_slo", "sync_fetch",  "STATIC", zs_wc2, -1, 0);
+                if ( msg_error() ) {
+                    logf(ERROR, "%s Erro ao definir lista de Ciclo de Vida: %s", zs_metodo,  msg[0]);
+                    z_bloco_fim(zi_depurar, zs_metodo);
+                    return;
+                } ;
+            }
+        }
+        zo_list2 = msg[0] ;
+        zi_num2 = (int) msg[1] ; 
+        
+        string zs_wc;
+        object zo_list;
+        int zi_num;
+        zs_wc = format("z_srl_cr = '%s' and z_srl_status = 'CL'",incidente );
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lista de ciclo_vida: '%s'", zs_metodo,  zs_wc); } ;        
+        send_wait( 0, top_object(), "call_attr", "z_cr_slo", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+        if ( msg_error() ) {
+            sleep(10);
+            send_wait( 0, top_object(), "call_attr", "z_cr_slo", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+            if ( msg_error() ) {
+                sleep(10);
+                send_wait( 0, top_object(), "call_attr", "z_cr_slo", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+                if ( msg_error() ) {
+                    logf(ERROR, "%s Erro ao definir lista de Ciclo de Vida: %s", zs_metodo,  msg[0]);
+                    z_bloco_fim(zi_depurar, zs_metodo);
+                    return;
+                } ;
+            }
+        }
+        zo_list = msg[0] ;
+        zi_num = (int) msg[1] ; 
+
+    int tempo_inic_int;
+    date tempo_inic, tempo_fim;
+    tempo_inic = now();
+    tempo_inic_int = tempo_inic;
+    //if(!is_null(tempo_tot) && zi_num2 == 0){ //IF Removido pois não quero contar a partir da data de abertura...
+      //tempo_inic_int = tempo_inic_int - tempo_tot;    
+      //tempo_inic = tempo_inic_int;
+    //}
+    tempo_fim = now();
+    //Cria um group leader
+    if(zi_num == 0){
+    object zo_group_leader;
+    send_wait(0, top_object(), "get_co_group");
+    zo_group_leader = msg[0];
+    
+    //Cria novo dob 
+    object zo_objeto;
+        send_wait( 0, top_object(), "call_attr", "z_cr_slo", "get_new_dob", "z_cr_slo", zo_group_leader, zo_group_leader);
+    zo_objeto = msg[0];
+
+    //Atualiza valores no novo objeto
+
+            duration zd_tempo, zd_tempo_grp, zd_tempo_svc;
+
+    //Data de inicio
+    send_wait(0, zo_objeto, "call_attr", "z_int_transf_1", "set_val", tempo_inic, "SURE_SET" );
+    
+    if ( status == "CL" && zi_num2 == 0) {
+        //aqui vamos gravar o que tem que ser gravado para fechamento rapido
+            zd_tempo = z_calcula_prazo(tempo_inic,tempo_fim,zs_workshift);
+            zd_tempo_grp = z_calcula_prazo(tempo_inic,tempo_fim,zs_work_grp);
+            zd_tempo_svc = z_calcula_prazo(tempo_inic,tempo_fim,zs_work_svc);    
+            send_wait(0, zo_objeto, "call_attr", "z_int_transf_2", "set_val", tempo_fim, "SURE_SET" );
+            send_wait(0, zo_objeto, "call_attr", "z_int_tempo_total", "set_val", zd_tempo, "SURE_SET" );
+            send_wait(0, zo_objeto, "call_attr", "z_int_tempo_wsgrp", "set_val", zd_tempo_grp, "SURE_SET" );
+            send_wait(0, zo_objeto, "call_attr", "z_int_tempo_wssvc", "set_val", zd_tempo_svc, "SURE_SET" );   
+    } ;
+
+    if ( status == "CL" && zi_num2 != 0) {
+        //aqui vamos gravar o que tem que ser gravado para fechamento rapido
+        send_wait(0, zo_objeto, "call_attr", "z_int_transf_2", "set_val", tempo_fim, "SURE_SET" );
+
+
+            zd_tempo = z_calcula_prazo(tempo_inic,tempo_fim,zs_workshift);
+            zd_tempo_grp = z_calcula_prazo(tempo_inic,tempo_fim,zs_work_grp);
+            zd_tempo_svc = z_calcula_prazo(tempo_inic,tempo_fim,zs_work_svc);                
+            send_wait(0, zo_objeto, "call_attr", "z_int_tempo_total", "set_val", zd_tempo, "SURE_SET" );
+            send_wait(0, zo_objeto, "call_attr", "z_int_tempo_wsgrp", "set_val", zd_tempo_grp, "SURE_SET" );
+            send_wait(0, zo_objeto, "call_attr", "z_int_tempo_wssvc", "set_val", zd_tempo_svc, "SURE_SET" );       
+       
+    } ;
+        
+    //relacao com o incidente
+
+    send_wait(0, zo_objeto, "call_attr", "z_srl_cr", "set_val", incidente, "SURE_SET" );
+    if ( msg_error() ) {
+         logf(ERROR, "%s Erro ao definir data fim: %s", zs_metodo,  msg[0]);
+         return;
+    } ;
+    
+    //Responsavel
+        
+    uuid login_userid;
+    send_wait(0, top_object(), "call_attr", "cr", "current_user_id");
+    login_userid = msg[0];
+
+    if(is_null(login_userid)){
+        if ( zi_depurar==1 ) logf(SIGNIFICANT,"%s Usuário Nulo - Setando System_AHD_Generated",zs_metodo);
+
+        string zs_user;
+        object zs_user_list,zs_user_objeto, zs_objeto;
+        int zs_user_num;
+        zs_user = format("last_name = 'System_AHD_generated'" );
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lista de usuarios: '%s'", zs_metodo,  zs_user); } ;        
+        send_wait( 0, top_object(), "call_attr", "cnt", "sync_fetch",  "STATIC", zs_user, -1, 0);
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao definir lista de usuarios: %s", zs_metodo,  msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } ;
+        zs_user_list = msg[0] ;
+        zs_user_num = (int) msg[1] ;   
+        
+        send_wait( 0, zs_user_list, "dob_by_index", "DEFAULT", 0, 0);
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao identificar usuario: %s", zs_metodo,  msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } ;
+        zs_objeto = msg[0];
+        login_userid = zs_objeto.id;
+
+    }
+        
+    send_wait(0, zo_objeto, "call_attr", "z_srl_analista", "set_val", login_userid, "SURE_SET" );
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao definir responsavel: %s", zs_metodo,  msg[0]);
+        return;
+    } ;
+    
+    send_wait(0, zo_objeto, "call_attr", "z_srl_responsavel", "set_val", z_resp, "SURE_SET" );
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao definir responsavel: %s", zs_metodo,  msg[0]);
+        return;
+    } ;
+    
+    //status
+        send_wait(0, zo_objeto, "call_attr", "z_srl_status", "set_val",status, "SURE_SET" );
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao definir data fim: %s", zs_metodo,  msg[0]);
+            return;
+        } ;
+     
+        
+    //Grupo
+    send_wait(0, zo_objeto, "call_attr", "z_srl_grupo", "set_val", grupo, "SURE_SET" );
+
+
+    //Categoria
+    send_wait(0, zo_objeto, "call_attr", "z_srl_categoria", "set_val", categoria, "SURE_SET" );
+
+
+            
+    // Faz o checkindo objeto zo_objeto
+    send_wait(0, zo_group_leader, "checkin", zo_objeto); 
+
+    }
+
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s - Fim de z_cria_novo_ciclo_vida.", zs_metodo ); } ;
+    
+
+}
+
+
+z_atualiza_ultimo_ciclo_vida(string incidente,uuid responsavel,string status,string zs_workshift, string zs_work_svc, date op_dt, date cl_dt, int tempo_tot, uuid grupo, int controle_assignee, string categoria){
+
+
+        int zi, zi_depurar;
+    	string zs_metodo, zs_work_grp;
+    	zs_metodo = 'z_atualiza_ultimo_ciclo_vida - ';
+    
+        // Alterar valor zi_depurar parar 1 para debug mode
+        zi_depurar = 1;
+            
+        ///////////////////////////////////////////////////////////////////////////////////////
+        // Inicio do codigo
+        
+        
+        //iremos pegar o ultimo registro do ciclo de vida
+        
+        //Efetua uma busca no banco de dados a partir da clausula definida em zs_wc
+        string zs_Incidente,zs_wc;
+        object zo_list,zo_objeto;
+        int zi_num;
+        zs_wc = format("z_srl_cr = '%s'",incidente );
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lista de ciclo_vida: '%s'", zs_metodo,  zs_wc); } ;        
+        send_wait( 0, top_object(), "call_attr", "z_cr_slo", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+        if ( msg_error() ) {
+            sleep(10);
+            send_wait( 0, top_object(), "call_attr", "z_cr_slo", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+            if ( msg_error() ) {
+                sleep(10);
+                send_wait( 0, top_object(), "call_attr", "z_cr_slo", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+                if ( msg_error() ) {
+                    logf(ERROR, "%s Erro ao definir lista de Ciclo de Vida: %s", zs_metodo,  msg[0]);
+                    z_bloco_fim(zi_depurar, zs_metodo);
+                    return;
+                } ;
+            }
+        }
+        zo_list = msg[0] ;
+        zi_num = (int) msg[1] ;   
+        
+        if ( zi_num > 0 ) {
+            zi_num = zi_num - 1;
+            //Pega o ultimo ciclo
+            send_wait( 0, zo_list, "dob_by_index", "DEFAULT", zi_num, zi_num);
+            if ( msg_error() ) {
+                logf(ERROR, "%s Erro ao instanciar Ciclo de Vida: %s", zs_metodo,  msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);
+                return;
+            } ;
+            zo_objeto = msg[0];
+            zs_work_grp = zo_objeto.z_srl_grupo.schedule;
+            if(is_null(zs_work_grp)){
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s entrou aqui???????", zs_metodo ); } ;	
+                zs_work_grp = 'wrkshft:4600';    
+            }        
+        
+            //Cria um group leader
+            object zo_group_leader;
+            send_wait(0, top_object(), "get_co_group");
+            if ( msg_error() ) {
+                logf(ERROR, "%s Erro ao criar group leader: ", zs_metodo,  msg[0]);
+                return;
+            } ;
+            zo_group_leader = msg[0];
+        
+        
+            //Faz o checkout do objeto zo_objeto
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro", zs_metodo ); } ;	
+
+            send_wait(0, zo_group_leader, "checkout", zo_objeto); 
+            if ( msg_error() ) {
+                sleep(10);
+                send_wait(0, zo_group_leader, "checkout", zo_objeto); 
+                if ( msg_error() ) {
+                    sleep(10);
+                    send_wait(0, zo_group_leader, "checkout", zo_objeto);
+                    if ( msg_error() ) {
+                        zs_msg = format("%s Outras pessoas estão editando o ticket %s - Não foi possível travar para gravação o registro.", zs_metodo )  ;
+                        set_error(1);
+                        set_return_data(zs_msg);
+                        z_bloco_fim(zi_depurar, zs_metodo);                
+                        return;
+                    }
+                }
+            } ;
+        
+        
+            //atualiza informacoes
+        
+            //Data de fim
+            send_wait(0, zo_objeto, "call_attr", "z_int_transf_2", "set_val", now(), "SURE_SET" );
+            if ( msg_error() ) {
+                logf(ERROR, "%s Erro ao definir data fim: %s", zs_metodo,  msg[0]);
+                return;
+            } ;
+             
+            //duracao 
+            //para saber a duracao correta, iremos pegar a data inicial desse ciclo
+            //e tambem do workshift da localidade do IC do incidente
+            //Carrega valores de um objeto
+            send_wait(0, zo_objeto, "get_attr_vals", 1, "z_int_transf_1" ) ;
+            if ( msg_error() ) {
+                logf(ERROR, "%s ERRO ao retornar atributos: %s", zs_metodo,  msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);
+                return;
+            } ;
+            date zd_data_inicio, zd_data_fim;    
+            int zd_data_inicio_int;   
+            zd_data_inicio = msg[3];
+            zd_data_fim = now();
+            zd_data_inicio_int = zd_data_inicio;
+            if (op_dt == cl_dt) {
+                logf(ERROR, "%s data inicio: %s", zs_metodo,  zd_data_inicio_int);      
+                zd_data_inicio_int = zd_data_inicio_int - tempo_tot ;
+                logf(ERROR, "%s data inicio: %s, tempo total %s", zs_metodo,  zd_data_inicio_int, tempo_tot);      
+            }
+
+               
+            duration zd_tempo, zd_tempo_grp, zd_tempo_svc;
+            zd_tempo = z_calcula_prazo(zd_data_inicio,zd_data_fim,zs_workshift);
+            zd_tempo_grp = z_calcula_prazo(zd_data_inicio,zd_data_fim,zs_work_grp);
+            zd_tempo_svc = z_calcula_prazo(zd_data_inicio,zd_data_fim,zs_work_svc);                
+            send_wait(0, zo_objeto, "call_attr", "z_int_tempo_total", "set_val", zd_tempo, "SURE_SET" );
+            send_wait(0, zo_objeto, "call_attr", "z_int_tempo_wsgrp", "set_val", zd_tempo_grp, "SURE_SET" );
+            send_wait(0, zo_objeto, "call_attr", "z_int_tempo_wssvc", "set_val", zd_tempo_svc, "SURE_SET" );                
+	    if(!is_null(responsavel)&&!is_empty(responsavel)){
+	    	if (controle_assignee == 1) {
+            		send_wait(0, zo_objeto, "call_attr", "z_srl_responsavel", "set_val", responsavel, "SURE_SET" );
+            	} ;
+            };
+
+         
+            // Faz o checkindo objeto zo_objeto
+            send_wait(0, zo_group_leader, "checkin", zo_objeto); 
+            if ( msg_error() ) {
+                logf(ERROR, "%s Erro ao fazer chekin: %s", zs_metodo,  msg[0]);
+                return;
+            } ;
+        } else { //do numero de registros na lista
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nao encontramos item na lista. Verificando se o status e CL (fechamento rapido).", zs_metodo); } ;
+            if ( status != "CL" ) {
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Saindo pois o status nao e CL.", zs_metodo); } ;
+                z_bloco_fim(zi_depurar, zs_metodo);
+                return;
+            } else {
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Vamos criar a linha fechada.", zs_metodo); } ;
+                //z_cria_novo_ciclo_vida(incidente,grupo,status,tempo_tot);
+                z_bloco_fim(zi_depurar, zs_metodo);
+            }
+        } ;
+    
+        // Fim do codigo
+        ///////////////////////////////////////////////////////////////////////////////////////
+
+
+}

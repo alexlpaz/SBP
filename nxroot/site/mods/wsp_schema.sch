@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_schema.sch
-// Data de publicação: 26/06/2013 14:50:33
+// Data de publicação: 27/06/2013 10:40:53
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -26,6 +26,7 @@ TABLE Call_Req {
   z_int_num_redir	INTEGER;
   z_int_reclass	INTEGER;
   z_int_sla_viol_atend	INTEGER;
+  z_int_slo	INTEGER;
   z_srl_cr	STRING 30 REF Call_Req;
 }
 
