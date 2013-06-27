@@ -48,4 +48,20 @@ OBJECT pcat {
   		COMMON_NAME ss_sym ;
 		FUNCTION_GROUP "reference" ;
 	};
+
+    FACTORY z_pcat_zcr{
+          RESTRICT "z_srl_tipo IS NOT NULL AND (z_srl_tipo='R' OR z_srl_tipo='I')" {delete_flag = 0} ;
+
+          STANDARD_LISTS {
+                SORT_BY "sym" ;
+		WHERE "delete_flag = 0 AND z_srl_tipo='R' OR z_srl_tipo='I'" ; 
+                MLIST OFF ;
+                RLIST OFF ;
+          };
+
+		REL_ATTR persistent_id ;
+    		COMMON_NAME sym ;
+    		FUNCTION_GROUP "call_mgr_reference" ;
+   };
+
 };

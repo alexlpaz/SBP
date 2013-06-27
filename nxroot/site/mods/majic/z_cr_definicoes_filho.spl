@@ -31,9 +31,9 @@ cr::z_cr_definicoes_filho(...)
     } ;      
     ///////////////////////////////////////////////////////////////////////////////////////
     // Inicio do codigo
-    string zs_msg, zs_analista_pai, zs_grupo_pai, zs_resocode_pai, zs_status_pai, zs_persid, zs_persid_pai;
+    string zs_msg, zs_analista_pai, zs_grupo_pai, zs_status_pai, zs_persid, zs_persid_pai;
     object zo_groupLeader, zo_cr, zo_cr_pai, zo_lista, zo_item;
-    int zi_lista, zi_index;
+    int zi_lista, zi_index, zi_resocode_pai;
     
     zs_persid=(string)argv[3];
     zs_persid_pai=(string)argv[6];
@@ -67,10 +67,10 @@ cr::z_cr_definicoes_filho(...)
     } ;
     zo_cr_pai=msg[0];
     send_wait(0, zo_cr_pai, "get_attr_vals",4,"status","assignee","group","resolution_code");
-    zs_status_pai=msg[3];
-    zs_analista_pai=msg[6];
-    zs_grupo_pai=msg[8];
-    zs_resocode_pai=msg[12];
+    zs_status_pai=(string) msg[3];
+    zs_analista_pai=(string) msg[6];
+    zs_grupo_pai=(string) msg[8];
+    zi_resocode_pai=(int) msg[12];
     
     //Faz o checkout do objeto zo_objeto
     if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro", zs_metodo ); } ;	
@@ -82,7 +82,7 @@ cr::z_cr_definicoes_filho(...)
     } ;
     send_wait(0, zo_cr, "call_attr", "assignee", "set_val", zs_analista_pai, "SURE_SET");
     send_wait(0, zo_cr, "call_attr", "group", "set_val", zs_grupo_pai, "SURE_SET");
-    send_wait(0, zo_cr, "call_attr", "resolution_code", "set_val", zs_resocode_pai, "SURE_SET");
+    send_wait(0, zo_cr, "call_attr", "resolution_code", "set_val", zi_resocode_pai, "SURE_SET");
     if (zo_cr_pai.status != "PEND") {
         send_wait(0, zo_cr, "call_attr", "status", "set_val", zs_status_pai, "SURE_SET");
     };

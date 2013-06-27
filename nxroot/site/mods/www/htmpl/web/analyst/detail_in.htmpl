@@ -785,7 +785,7 @@ if ( cfgUserAuth \> 1 && ahdtop.cfgNX_KT == "Yes" && ahdtop.cfgEBRVersion == "SE
 <PDM_IF "$args.resolve_date" == "" && "$args.z_srl_cr" == "" && "$prop.form_name_3" != "edit">
 if ( cfgUserAuth \> 1 ) {
 ImgBtnRow();
-<PDM_MACRO name=button caption="Criar ticket relacionado" func="create_new('cr',0,0,0,'PRESET=type:I','PRESET=customer:$args.assignee','PRESET=requested_by:$args.assignee', 'PRESET=z_srl_cr:$args.persistent_id')" hotkey_name="Create Ticket" id=z_cri_ticket>
+<PDM_MACRO name=button caption="Criar ticket relacionado" func="create_new('cr',0,0,0,'PRESET=type:I','PRESET=customer:$cst.id','PRESET=requested_by:$cst.id', 'PRESET=z_srl_cr:$args.persistent_id')" hotkey_name="Create Ticket" id=z_cri_ticket>
 ImgBtnEndRow();
 }
 </PDM_IF>
@@ -810,7 +810,11 @@ ImgBtnEndRow();
 <PDM_MACRO name=dtlStartRow>
 <PDM_MACRO name=dtlLookup hdr="Solicitante" attr="requested_by" evt="onChange=\\\"backfill_cnt_event()\\\"">
 <PDM_MACRO name=dtlLookup hdr="Usuário final afetado" attr=customer evt="onBlur='calculateUrgency()'">
-<PDM_MACRO name=dtlHier hdr="Área de incidente" attr=category autofill=no evt="onChange=\\\"change_category_func('in',null,'pcat_in')\\\" onBlur='calculateUrgency()'" factory=pcat_in>
+<PDM_IF $args.id == 0>
+    <PDM_MACRO name=dtlHier hdr="Categoria" attr=category autofill=no evt="onChange=\\\"change_category_func('in',null,'pcat_in')\\\" onBlur='calculateUrgency()'" factory=pcat_in>
+<PDM_ELSE>
+    <PDM_MACRO name=dtlHier hdr="Categoria" attr=category autofill=no evt="onChange=\\\"change_category_func('z_cr',null,'z_pcat_zcr')\\\" onBlur='calculateUrgency()'" factory=z_pcat_zcr>
+</PDM_IF>
 <PDM_MACRO name=dtlDropdown hdr="Status" attr=status factory=crs_in>
 <PDM_MACRO name=dtlDropdown hdr="Prioridade" attr=priority evt="onBlur=\\\"detailSyncEditForms(this)\\\"" lookup=no>
 <PDM_MACRO name=dtlReadonly hdr="Ativo?" attr=active>

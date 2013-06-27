@@ -1,0 +1,251 @@
+<PDM_IF 0>
+list_alg.htmpl
+WHEN PRESENTED:
+    When we need to display a list of Request Activity Logs
+INTENT:
+    Display the list of Request Activity Logs
+VARIABLES:
+    string	image	The location of the image directory as specified in 	
+			    in the config file.
+    object alg_list list The list object containing the Request Activity Log
+                        See $NX_ROOT/bopcfg/majic/cm.maj for the
+                        definition of attributes for 'OBJECT alg'
+    int		start	Where the list should start displaying
+    int		length  How many elements the list should display
+    string	sort	What the list should sort by.
+    int		record_count How many are in the list
+    int		current What page of we are currently on
+    int		total   How many pages there are
+</PDM_IF>
+<html lang="pt_BR"><HEAD>
+<PDM_PRAGMA RELEASE=110>
+<PDM_INCLUDE FILE=styles.htmpl>
+<SCRIPT LANGUAGE="JavaScript">
+if(typeof parent.requestTypeSym=="string")
+{
+	var propRequestType=parent.requestTypeSym;
+} else {
+	var propRequestType="Solicitação";
+}
+
+var hdrTitle, hdrTitleList;
+if( typeof parent.requestType=="string")
+{
+    switch(parent.requestType)
+    {
+        case "I":
+            hdrTitle = "Pesquisa de log de atividades do incidente";
+            hdrTitleList = "Lista de logs de atividades do incidente";
+            break;
+        case "P":
+            hdrTitle = "Pesquisa de log de atividades do problema";
+            hdrTitleList = "Lista de logs de atividades do problema";
+            break;
+        case "R":
+        default :
+            hdrTitle = "Pesquisa de log de atividades de solicitação";
+            hdrTitleList = "Lista de logs de atividades de solicitação";
+            break;
+    }
+}
+else
+{
+    hdrTitle = "Pesquisa de log de atividades de solicitação";
+    hdrTitleList = "Lista de logs de atividades de solicitação";
+}
+</SCRIPT>
+<PDM_INCLUDE FILE=std_head.htmpl >
+<SCRIPT LANGUAGE="JavaScript">
+var rptName = new Array("", "");
+var cfgCanEdit = true;
+</SCRIPT>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/val_type.js"></SCRIPT>
+<PDM_INCLUDE FILE=std_list_include.htmpl>
+<SCRIPT LANGUAGE="JavaScript" SRC="$CAisd/scripts/sitemods.js"></SCRIPT>
+</HEAD>
+<BODY CLASS="list">
+<PDM_INCLUDE FILE=std_body.htmpl filename=propRequestType+" Log de atividades">
+<SCRIPT LANGUAGE="JavaScript">
+var argCRPersid = "$args.QBE.EQ.call_req_id";
+var argCRid = argCRPersid.substr(argCRPersid.indexOf(":") + 1);
+<PDM_MACRO name=sfStart create=false factory=alg>
+document.write('<INPUT TYPE=hidden NAME="KEEP.cr_id" VALUE="$args.KEEP.cr_id">');			
+document.write('<INPUT TYPE=hidden NAME="QBE.EQ.call_req_id" VALUE="$args.QBE.EQ.call_req_id">');
+<PDM_IF $prop.view_internal == 0>	
+document.write('<INPUT TYPE=hidden ID=ADDL_WHERE_HARDCODE NAME=ADDL_WHERE_HARDCODE VALUE="(internal = 0 OR internal IS NULL)">');
+</PDM_IF>
+<PDM_MACRO name=sfStartRow>
+<PDM_MACRO name=sfDate hdr="Data de log mais antiga" attr=time_stamp qbe_condition=GE>
+<PDM_MACRO name=sfDate hdr="Data de log mais recente" attr=time_stamp qbe_condition=LE>
+<PDM_MACRO name=sfDropdown hdr="Tipo de atividade" attr=type factory=aty>
+<PDM_MACRO name=sfLookup hdr="Criado por" attr=analyst colspan=2 factory=cnt>
+<PDM_MACRO name=sfDropdown hdr="Tipo de atividade do ticket relacionado" attr="rel_ticket_type" factory=aty>
+<PDM_MACRO name=sfEnd>
+</SCRIPT>
+<PDM_FORM NAME="frmFID">
+</PDM_FORM>
+<PDM_IF "${current:n/a}" != "n/a">
+<SCRIPT LANGUAGE="JavaScript">
+if( typeof parent.requestType=="string")
+{
+    switch(parent.requestType)
+    {
+        case "I":
+            msgFoundNone = "Nenhum log de atividades de incidente encontrado";
+            msgFound1 = "1 log de atividades de incidente encontrado";
+            msgFound = "%1 logs de atividades de incidente encontrados";
+            msgFoundMore = "%1 logs de atividade de incidentes encontrados.  Exibindo de %2 a %3";
+            msgSelect = "Clique para selecionar o log de atividades de incidente desejado";
+            break;
+        case "P":
+            msgFoundNone = "Nenhum log de atividades de problema encontrados";
+            msgFound1 = "1 log de atividades de problema encontrado";
+            msgFound = "%1 logs de atividades de problema encontrados";
+            msgFoundMore = "%1 logs de atividade de problema encontrados.  Exibindo de %2 a %3";
+            msgSelect = "Clique para selecionar o log de atividades de problema desejado";
+            break;
+        case "R":
+        default :
+            msgFoundNone = "Nenhum log de atividades de solicitação encontrado";
+            msgFound1 = "1 log de atividades de solicitação encontrado";
+            msgFound = "%1 logs de atividades de solicitação encontrados";
+            msgFoundMore = "%1 logs de atividade de solicitação encontrados.  Exibindo de %2 a %3";
+            msgSelect = "Clique para selecionar o log de atividades de solicitação desejado";
+            break;
+    }
+}
+else
+{
+    msgFoundNone = "Nenhum log de atividades de solicitação encontrado";
+    msgFound1 = "1 log de atividades de solicitação encontrado";
+    msgFound = "%1 logs de atividades de solicitação encontrados";
+    msgFoundMore = "%1 logs de atividade de solicitação encontrados.  Exibindo de %2 a %3";
+    msgSelect = "Clique para selecionar o log de atividades de solicitação desejado";
+}
+
+var showInternalIcon;
+var listtypecode;
+var listtypesym;
+var listsession;
+var listCRType;
+var listcall_req_id;
+function fmtType(value)
+{
+if (0 == showInternalIcon.length) showInternalIcon = "0";
+
+if (listtypecode == "SBLIVELOG"  || (listtypecode == "KTSOLN" && listsession != "") ||
+    (listtypecode == "AUDTRAIL") ||
+    (listtypecode == "KTREJECT" && listsession != "")
+	|| (listtypecode == "KTSUBMIT" && listsession != ""))
+{
+    var alghtml;
+    var argCRPersidEscaped = nx_escape(listcall_req_id);
+    var argCRType = listCRType;
+    var arrtmp = listcall_req_id.split(':');
+    var argID = arrtmp[1];
+    var argFactory = arrtmp[0];
+    if (listtypecode == "SBLIVELOG")
+    {
+			alghtml = "<A CLASS=record TITLE='Clique para exibir os logs da Automação de suporte' " +
+				"HREF=\"javascript:showSATab()\">\n" +
+				listtypesym +
+				"</A>\n";
+		}
+    else if (listtypecode == "KTSOLN" || listtypecode == "KTREJECT" || listtypecode == "KTSUBMIT")
+    {
+		alghtml = "<A CLASS=record TITLE='Clique aqui para exibir o documento de conhecimento " + listsession + 
+			"' HREF=\"javascript:popup_window('','SHOW_DETAIL', 0, 0, " + 
+			"'directories=no,location=no,menubar=no,status=no,gobutton=no,menubar=no','PERSID=KD:" + listsession + 
+			"', 'HTMPL=kt_document_view.htmpl', 'opener=search_tools', 'open_mode=2', 'reload=1', 'SOLUTION_OF=" + 
+			argCRPersidEscaped + "', 'disable_solution_survey=true', 'TICKET_FACTORY=cr', 'SOLUTION_OF_ID=" + argID + "'," +
+			"'PATH_IDS=" + listaction_desc + "')\">\n";
+		alghtml += listtypesym;
+    		alghtml += "</A>\n";
+    }
+    else 
+    {
+		alghtml = "<A CLASS=record TITLE='Clique para exibir o evento de conhecimento' " + 
+			"HREF=\"javascript:popup_window('','SEARCH', 0, 0, 'directories=no,location=no,menubar=no,status=no', " + 
+			"'FACTORY=event_log', 'QBE.EQ.session=" + listsession + "'" + 
+			",'QBE.EQ.sd_obj_type=" + argFactory + "'" +
+			",'QBE.EQ.sd_obj_id=" + argCRid + "'" +
+			",'p_sd_obj_type=cr', 'p_sd_obj_id=" + argCRid + "', 'KEEP.p_sd_cr_type=" + argCRType + "', 'sd_create_session=" + listsession + "')\">\n";
+		alghtml += listtypesym;
+    		alghtml += "</A>\n";
+    }
+    if ("1" == showInternalIcon) {
+		alghtml += "&nbsp;&nbsp;<IMG class=gn_container_no_border SRC=$CAisd/img/glasses.gif TITLE='Este é um log interno' alt='Este é um log interno'>";
+	}
+    rs.data(alghtml);
+}
+else 
+{
+	var tmp = listtypesym;
+	if ("1" == showInternalIcon) {
+		tmp += "&nbsp;&nbsp;<IMG class=gn_container_no_border SRC=$CAisd/img/glasses.gif TITLE='Este é um log interno' alt='Este é um log interno'>";
+	}
+    rs.data(tmp);
+}
+
+
+}
+
+
+function UnEscapeDesc(value)
+{
+var ret;
+ret =nx_unescape(value);
+// Replace multiple breaks with one.
+ret = ret.replace(/(<BR>\s*){2,}/ig, "<br>");
+rs.data(ret);
+}
+
+function zUnEscapeDesc(value)
+{
+var ret;
+ret =nx_unescape(value);
+// Replace multiple breaks with one.
+ret = ret.replace(/(<BR>\s*){2,}/ig, "<br>");
+rs.data(ret);
+}
+
+function showUser(value)
+{
+	var alghtml;
+
+	alghtml = "<A CLASS=record HREF=\"javascript:showDetailWithPersid('" + analyst_persid + "')\">" + value + "</A>" ;
+	rs.data(alghtml);
+}
+
+function showSATab() {
+	parent.show_accordion_tab(parent.find_matching_tab('sa_event_history'));
+}
+
+<PDM_MACRO name=lsStart>
+<PDM_MACRO name=lsWrite text="showInternalIcon = \"@{list.internal:}\";">
+<PDM_MACRO name=lsWrite text="listtypecode = \"@{list.type.code:}\";">
+<PDM_MACRO name=lsWrite text="listtypesym = \"@{list.type.sym:}\";">
+<PDM_MACRO name=lsWrite text="listCRType = \"@{list.call_req_id.type.sym:}\";">
+<PDM_MACRO name=lsWrite text="listsession = \"@{list.session:}\";">
+<PDM_MACRO name=lsWrite text="listcall_req_id = \"@{list.call_req_id:}\";">
+<PDM_MACRO name=lsWrite text="listaction_desc = <PDM_FMT ESC_STYLE=HTML> \"@{list.action_desc:}\"</PDM_FMT>;">
+<PDM_MACRO name=lsWrite text="var analyst_persid = \"@{list.analyst.persistent_id:}\";">
+<PDM_MACRO name=lsCol hdr="Tipo" attr=type fmtfunc=fmtType link=yes sort=yes>
+<PDM_MACRO name=lsCol hdr="Criado por" attr=analyst fmtfunc=showUser link=yes sort=no>
+<PDM_MACRO name=lsCol hdr="Em" attr=time_stamp>
+<PDM_MACRO name=lsCol hdr="Tempo gasto" attr=time_spent>
+<PDM_MACRO name=lsCol hdr="Descrição" attr=description export=no fmtfunc=UnEscapeDesc sort=no max_char=80 escape="JS2">
+<PDM_MACRO name=lsWrite text="pdm_if \"@{list.type:0}\" == 'TR'">
+  <PDM_MACRO name=lsCol label="Grupo origem" attr=z_srl_group export=no sort=no colspan=5 startrow=yes NOWRAP>
+  <PDM_MACRO name=lsCol label="Cód. de resol. intermediário" attr=z_srl_resocode export=no sort=no colspan=5 startrow=yes>
+  <PDM_MACRO name=lsCol label="Código de encaminhamento" attr=z_srl_transfcode.sym export=no sort=no colspan=5>
+<PDM_MACRO name=lsWrite text="/pdm_if">
+<PDM_MACRO name=lsCol attr=description export=no sort=no colspan=5 startrow=yes fmtfunc=zUnEscapeDesc escape="JS2">
+<PDM_MACRO name=lsEnd>
+</SCRIPT>
+</PDM_IF>
+
+<PDM_INCLUDE FILE="std_footer.htmpl">
+</BODY>
+</HTML>
+<PDM_WSP>

@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_schema.sch
-// Data de publicação: 27/06/2013 10:40:53
-// Usuário publicador: Administrator
+// Data de publicação: 27/06/2013 11:27:42
+// Usuário publicador: ServiceDesk
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
 ////////////////////////////////////////////////////////////////////////

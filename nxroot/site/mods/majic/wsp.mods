@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp.mods
-// Data de publicação: 27/06/2013 10:40:52
-// Usuário publicador: Administrator
+// Data de publicação: 27/06/2013 11:27:42
+// Usuário publicador: ServiceDesk
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
 ////////////////////////////////////////////////////////////////////////
@@ -576,6 +576,7 @@ OBJECT z_tipo_trat_espec {
 
 ////////////////////////////////////////////////////////////////////////
 // Fábrica:   ztransfcode (Códigos de encaminhamento)
+// Descrição: Fac_Attr_Entry ztransfcode
 ////////////////////////////////////////////////////////////////////////
 
 OBJECT ztransfcode {
@@ -606,5 +607,6 @@ OBJECT ztransfcode {
       RLIST OFF;
     };
     REL_ATTR id;
+    COMMON_NAME sym;
   };
 };
