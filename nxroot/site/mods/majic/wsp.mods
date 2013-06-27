@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp.mods
-// Data de publicação: 27/06/2013 11:27:42
-// Usuário publicador: ServiceDesk
+// Data de publicação: 27/06/2013 12:29:37
+// Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
 ////////////////////////////////////////////////////////////////////////
@@ -575,8 +575,128 @@ OBJECT z_tipo_trat_espec {
 };
 
 ////////////////////////////////////////////////////////////////////////
+// Fábrica:   zfluxo (Modelo de aprovação)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zfluxo {
+  DISPLAY_NAME "Modelo de aprovação";
+
+  ATTRIBUTES zfluxo {
+    delete_flag INTEGER
+      REQUIRED;
+    description STRING 4000;
+    modpasso SREL zmodpasso;
+    sym STRING 255;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zfluxo {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "call_mgr_reference";
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Fábrica:   zmodpasso (Modelo de Passo de Aprovação)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zmodpasso {
+  DISPLAY_NAME "Modelo de Passo de Aprovação";
+
+  ATTRIBUTES zmodpasso {
+    apprule STRING 4000;
+    cnt SREL cnt;
+    delete_flag INTEGER
+      REQUIRED;
+    grp SREL grp;
+    sequence INTEGER;
+    tipoaprovador SREL ztipoaprovador;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zmodpasso {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "call_mgr_reference";
+    REL_ATTR id;
+    COMMON_NAME sequence;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Fábrica:   zpasso (Passo de Aprovação)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT zpasso {
+  DISPLAY_NAME "Passo de Aprovação";
+
+  ATTRIBUTES zpasso {
+    approver SREL cnt;
+    comments STRING 4000;
+    delete_flag INTEGER
+      REQUIRED
+      {
+      ON_NEW DEFAULT 0;
+      };
+    sequence INTEGER;
+    status STRING 3;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY zpasso {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "call_mgr_reference";
+    REL_ATTR id;
+    COMMON_NAME sequence;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Fábrica:   ztipoaprovador (Tipo de Aprovador)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT ztipoaprovador {
+  DISPLAY_NAME "Tipo de Aprovador";
+
+  ATTRIBUTES ztipoaprovador {
+    delete_flag INTEGER
+      REQUIRED;
+    obj STRING 4000;
+    sym STRING 255;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY ztipoaprovador {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    FUNCTION_GROUP "call_mgr_reference";
+    REL_ATTR id;
+    COMMON_NAME sym;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
 // Fábrica:   ztransfcode (Códigos de encaminhamento)
-// Descrição: Fac_Attr_Entry ztransfcode
 ////////////////////////////////////////////////////////////////////////
 
 OBJECT ztransfcode {
@@ -607,6 +727,5 @@ OBJECT ztransfcode {
       RLIST OFF;
     };
     REL_ATTR id;
-    COMMON_NAME sym;
   };
 };

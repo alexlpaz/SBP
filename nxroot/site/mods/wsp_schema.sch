@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_schema.sch
-// Data de publicação: 27/06/2013 11:27:42
-// Usuário publicador: ServiceDesk
+// Data de publicação: 27/06/2013 12:29:37
+// Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
 ////////////////////////////////////////////////////////////////////////
@@ -199,6 +199,56 @@ TABLE z_tipo_trat_espec {
 }
 
 p1 z_tipo_trat_espec -> CURR_PROV z_tipo_trat_espec;
+
+TABLE zfluxo {
+  id	INTEGER UNIQUE KEY;
+  last_mod_dt	 LOCAL_TIME;
+  last_mod_by	 UUID REF ca_contact;
+  delete_flag	INTEGER;
+  description	STRING 4000;
+  modpasso	INTEGER REF zmodpasso;
+  sym	STRING 255;
+}
+
+p1 zfluxo -> CURR_PROV zfluxo;
+
+TABLE zmodpasso {
+  id	INTEGER UNIQUE KEY;
+  last_mod_dt	 LOCAL_TIME;
+  last_mod_by	 UUID REF ca_contact;
+  apprule	STRING 4000;
+  cnt	UUID REF ca_contact;
+  delete_flag	INTEGER;
+  grp	UUID REF ca_contact;
+  sequence	INTEGER;
+  tipoaprovador	INTEGER REF ztipoaprovador;
+}
+
+p1 zmodpasso -> CURR_PROV zmodpasso;
+
+TABLE zpasso {
+  id	INTEGER UNIQUE KEY;
+  last_mod_dt	 LOCAL_TIME;
+  last_mod_by	 UUID REF ca_contact;
+  approver	UUID REF ca_contact;
+  comments	STRING 4000;
+  delete_flag	INTEGER;
+  sequence	INTEGER;
+  status	STRING 3;
+}
+
+p1 zpasso -> CURR_PROV zpasso;
+
+TABLE ztipoaprovador {
+  id	INTEGER UNIQUE KEY;
+  last_mod_dt	 LOCAL_TIME;
+  last_mod_by	 UUID REF ca_contact;
+  delete_flag	INTEGER;
+  obj	STRING 4000;
+  sym	STRING 255;
+}
+
+p1 ztipoaprovador -> CURR_PROV ztipoaprovador;
 
 TABLE ztransfcode {
   id	INTEGER UNIQUE KEY;

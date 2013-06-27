@@ -134,6 +134,36 @@ ADD z_int_in_urg_up
 ADD z_int_pr_urg_up
 END
 
+TABLE zfluxo
+ADD delete_flag
+ADD description
+ADD modpasso
+ADD sym
+END
+
+TABLE zmodpasso
+ADD apprule
+ADD cnt
+ADD delete_flag
+ADD grp
+ADD sequence
+ADD tipoaprovador
+END
+
+TABLE zpasso
+ADD approver
+ADD comments
+ADD delete_flag
+ADD sequence
+ADD status
+END
+
+TABLE ztipoaprovador
+ADD delete_flag
+ADD obj
+ADD sym
+END
+
 TABLE ztransfcode
 ADD delete_flag
 ADD description
