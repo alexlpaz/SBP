@@ -198,6 +198,9 @@ function ss_include_click ( select_obj )
 <PDM_MACRO name=dtlTextbox hdr="Descrição" attr=description colspan=3 keeplinks=yes rows=4 size=60>
 </PDM_IF>
 <PDM_MACRO name=dtlStartRow>
+<pdm_if "$args.cr_flag" == "1">
+    <PDM_MACRO name=dtlLookup hdr="Modelo de Aprovação" attr=z_srl_fluxo>
+</pdm_if>
 <PDM_MACRO name=dtlReadonly hdr="Data da última modificação" attr="last_mod_dt">
 <PDM_MACRO name=dtlReadonly hdr="Última modificação feita por" attr="last_mod_by">
 <PDM_MACRO name=dtlEndTable>

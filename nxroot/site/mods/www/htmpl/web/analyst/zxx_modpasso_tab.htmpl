@@ -1,0 +1,141 @@
+<PDM_IF 0>
+xx_wf_tab.htmpl
+WHEN PRESENTED:
+    When we need to display a detail of a single Issue 
+INTENT:
+    Display a notebook page for iss workflow task.
+Note:
+The PDM_FORM tag is required for a notebook page htmpl 
+file, but only one PDM_FORM tag is allowed. Anything 
+outside the PDM_FORM tag wont be included in the 
+notebook page. All the javascript files defined in the 
+notebook page HTMPL file need to be also defined in the 
+main detail HTMPL file.
+User can test the notebook page HTMPL file by using the 
+following URL:
+<location of pdmcgi>?OP=SHOW_DETAIL+PERSID=<persistent_id>+
+HTMPL=<notebook page htmpl file name>
+for example: http://test_machine/scripts/pdmcgi.exe?OP=
+SHOW_DETAIL+PERSID=cr:13677+HTMPL=crro_alg_tab.htmpl
+</PDM_IF>
+<html lang="pt_BR"><head>
+<PDM_PRAGMA RELEASE=110>
+<PDM_WSP mode=edit preview="NBTAB=xx_wf_tab" factory=chg>
+<PDM_INCLUDE FILE=styles.htmpl>
+<PDM_INCLUDE FILE=std_head.htmpl busy=no>
+<script type="text/javascript" src="$CAisd/scripts/sitemods.js"></script>
+</head>
+<body class="detailro">
+<PDM_INCLUDE FILE=std_body.htmpl filename="Fluxo de trabalho">
+
+<PDM_FORM NAME="frmDTLRO">
+<script type="text/javascript">
+function get_approval_console_url() {
+    var factory = "$args.FACTORY";
+	var url=cfgCgi+
+	"?SID="+cfgSID+
+	"+FID="+fid_generator()+
+	"+FACTORY="+factory+
+	"+PERSID="+"$args.persistent_id"+
+	"+OP=SHOW_DETAIL"+
+	"+KEEP.is_cab_approval=1"+
+	"+KEEP.PERSID_POINTER="+cur_persid_pointer;  
+	if(factory!=undefined&&factory=="wf"){
+		url+="+HTMPL=orderwf_approval_console.htmpl";
+	}else{
+		url+="+HTMPL=order_approval_console.htmpl";
+	}	
+	return url;
+}
+
+function delete_wf(persid)
+{
+   var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+             "+OP=DELETE_WORKFLOW+PERSID=" + persid +
+             "+NEXT_PERSID=$args.persistent_id" +
+             "+FACTORY=$prop.form_name_2";
+   window.location.href = url;
+}
+function edit_wf(persid)
+{
+   var url = cfgCgi + "?SID=" + cfgSID + "+FID=" + cfgFID +
+             "+OP=UPDATE+PERSID=" + persid +
+             "+NEXT_PERSID=$args.persistent_id";
+   window.location.href = url;
+}
+
+
+
+<PDM_OBJECT>
+var tabButtonAuth = 1;  // Display buttons to users with readonly auth
+function add_button_to_tab_banner(){
+   
+<PDM_IF $UserAuth \> 1>
+<PDM_MACRO name=btnStartRow>
+
+<PDM_IF "$prop.form_name_3" != "edit">
+<PDM_MACRO name=button caption="Inserir" func="do_insert_tasks()" hotkey_name="Inserir" id=btn909 width=120>
+<PDM_ELSE>
+<PDM_MACRO name=button caption="Inserir tarefas[s]" disabled=yes func="do_insert_tasks()" hotkey_name="Insert Tasks[I]" id=btn909 width=120>
+</PDM_IF>
+
+<PDM_MACRO name=btnEndRow>
+</PDM_IF>
+}
+
+function do_refresh_wf_tasks() {
+    var refresh_tasks_url;
+	
+<PDM_IF "$prop.form_name_2" == "approval_console">
+		if(typeof cur_persid_pointer != "undefined")
+			refresh_tasks_url = get_approval_console_url();
+	
+<PDM_ELSE>
+		refresh_tasks_url = cfgCgi + "?SID=$prop.SID+FID=$prop.FID" + 
+                           "+OP=SHOW_DETAIL+PERSID=$args.persistent_id";
+</PDM_IF>  
+   browseWithURL(refresh_tasks_url);
+}
+function do_insert_tasks() {
+   var insert_str = cfgCgi + "?SID=$prop.SID+FID=$prop.FID+OP=CREATE_NEW" +
+                    "+KEEP.fluxo=$args.id+FACTORY=zmodpasso"
+                    "+EDIT_HTMPL=detail_zmodpasso.htmpl";
+   //browseWithURL(insert_str);
+   window.open(insert_str, 'MyWindow', 'width=900,height=400,left=100,top=200');
+}
+</PDM_OBJECT>
+
+<PDM_MACRO name=tabBanner title="Passos de Aprovação" add_btns=true>
+
+
+// Place holder that will have content after a category update
+<PDM_MACRO name=dtlStartDiv class="gn_display_none" divid="T13B343">
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=dtlShowtext dataclass="gn_text_big gn_content_center gn_white_smoke_background" value="Mudanças às tarefas de fluxo de trabalho não serão mostradas até que o ticket seja salvo">
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlEndDiv>
+
+var wfpersid = new Array();
+var wfhtml, wflnkid = -1;
+
+
+<PDM_MACRO name=dtlStartDiv divid="ShowTaskTable" style="visibility:visible">
+
+
+<PDM_MACRO name=tabList btntitle="Carregar lista de tarefas de fluxo de trabalho de ocorrência." height=300 src="OP=SEARCH+FACTORY=zmodpasso+QBE.EQ.fluxo=$args.id+QBE.EQ.delete_flag=0">
+
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlEndDiv>
+<PDM_MACRO name=dtlStartDiv divid="HideWorkflow" style="visibility:hidden">
+<PDM_MACRO name=dtlStartRow class='tab'>
+<PDM_MACRO name=dtlTextbox hdr="ID de definição do fluxo de trabalho" attr="n/a" id=catg_cawf_defid2 value="">
+<PDM_MACRO name=dtlEndTable>
+<PDM_MACRO name=dtlEndDiv>
+
+</script>
+</PDM_FORM>
+</body>
+</html>
+<PDM_IF 0>
+@(#)$Id: xx_wf_tab.htmpl ASPEN.7 2012/04/12 11:18:17 maide01 Exp $
+</PDM_IF>
