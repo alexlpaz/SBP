@@ -146,6 +146,7 @@ ADD apprule
 ADD cnt
 ADD delete_flag
 ADD grp
+ADD grpstep
 ADD ntfl
 ADD sequence
 ADD tipoaprovador
@@ -155,6 +156,7 @@ TABLE zpasso
 ADD approver
 ADD comments
 ADD delete_flag
+ADD grpstep
 ADD sequence
 ADD status
 END
