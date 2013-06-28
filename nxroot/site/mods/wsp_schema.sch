@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_schema.sch
-// Data de publicação: 28/06/2013 11:32:28
+// Data de publicação: 28/06/2013 11:51:02
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -221,6 +221,7 @@ TABLE zmodpasso {
   apprule	STRING 4000;
   cnt	UUID REF ca_contact;
   delete_flag	INTEGER;
+  fluxo	INTEGER REF zfluxo;
   grp	UUID REF ca_contact;
   grpstep	INTEGER;
   ntfl	INTEGER REF Notify_Object_Attr;
@@ -236,6 +237,7 @@ TABLE zpasso {
   last_mod_by	 UUID REF ca_contact;
   approver	UUID REF ca_contact;
   comments	STRING 4000;
+  cr	STRING 30 REF Call_Req;
   delete_flag	INTEGER;
   grpstep	INTEGER;
   sequence	INTEGER;

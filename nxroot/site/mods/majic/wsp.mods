@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp.mods
-// Data de publicação: 28/06/2013 11:32:28
+// Data de publicação: 28/06/2013 11:51:02
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -618,6 +618,7 @@ OBJECT zmodpasso {
     cnt SREL cnt;
     delete_flag INTEGER
       REQUIRED;
+    fluxo SREL zfluxo;
     grp SREL grp;
     grpstep INTEGER;
     ntfl SREL ntfl;
@@ -650,6 +651,7 @@ OBJECT zpasso {
   ATTRIBUTES zpasso {
     approver SREL cnt;
     comments STRING 4000;
+    cr SREL cr;
     delete_flag INTEGER
       REQUIRED
       {

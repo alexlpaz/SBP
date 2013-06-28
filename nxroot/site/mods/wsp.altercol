@@ -147,6 +147,7 @@ TABLE zmodpasso
 ADD apprule
 ADD cnt
 ADD delete_flag
+ADD fluxo
 ADD grp
 ADD grpstep
 ADD ntfl
@@ -157,6 +158,7 @@ END
 TABLE zpasso
 ADD approver
 ADD comments
+ADD cr
 ADD delete_flag
 ADD grpstep
 ADD sequence
