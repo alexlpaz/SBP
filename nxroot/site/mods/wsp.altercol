@@ -26,6 +26,7 @@ ADD z_srl_tipo_org
 END
 
 TABLE Prob_Category
+ADD z_srl_fluxo
 ADD z_srl_impact
 ADD z_srl_servico
 ADD z_srl_tipo

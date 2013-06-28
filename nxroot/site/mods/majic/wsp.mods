@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp.mods
-// Data de publicação: 28/06/2013 10:26:38
+// Data de publicação: 28/06/2013 11:32:28
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -88,6 +88,7 @@ OBJECT org {
 
 OBJECT pcat {
   ATTRIBUTES Prob_Category {
+    z_srl_fluxo SREL zfluxo;
     z_srl_impact SREL imp; // SRel_Attr_Entry pcat.z_srl_impact
     z_srl_servico SREL nr;
     z_srl_tipo SREL crt
