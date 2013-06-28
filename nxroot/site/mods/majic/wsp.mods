@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp.mods
-// Data de publicação: 28/06/2013 11:51:02
+// Data de publicação: 28/06/2013 12:03:15
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -586,7 +586,10 @@ OBJECT zfluxo {
 
   ATTRIBUTES zfluxo {
     delete_flag INTEGER
-      REQUIRED;
+      REQUIRED
+      {
+      ON_NEW DEFAULT 0;
+      };
     description STRING 4000;
     modpasso SREL zmodpasso;
     sym STRING 255;
@@ -608,6 +611,7 @@ OBJECT zfluxo {
 
 ////////////////////////////////////////////////////////////////////////
 // Fábrica:   zmodpasso (Modelo de Passo de Aprovação)
+// Descrição: Fac_Attr_Entry zmodpasso
 ////////////////////////////////////////////////////////////////////////
 
 OBJECT zmodpasso {
@@ -617,7 +621,10 @@ OBJECT zmodpasso {
     apprule STRING 4000;
     cnt SREL cnt;
     delete_flag INTEGER
-      REQUIRED;
+      REQUIRED
+      {
+      ON_NEW DEFAULT 0;
+      };
     fluxo SREL zfluxo;
     grp SREL grp;
     grpstep INTEGER;
@@ -685,7 +692,10 @@ OBJECT ztipoaprovador {
 
   ATTRIBUTES ztipoaprovador {
     delete_flag INTEGER
-      REQUIRED;
+      REQUIRED
+      {
+      ON_NEW DEFAULT 0;
+      };
     obj STRING 4000;
     sym STRING 255;
     last_mod_dt DATE { ON_CI SET NOW; };
