@@ -17,6 +17,7 @@ ADD z_int_reclass
 ADD z_int_sla_viol_atend
 ADD z_int_slo
 ADD z_srl_cr
+ADD z_srl_fluxo
 END
 
 TABLE usp_organization

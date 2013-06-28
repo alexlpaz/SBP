@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp.mods
-// Data de publicação: 28/06/2013 10:01:50
+// Data de publicação: 28/06/2013 10:26:38
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -65,6 +65,7 @@ OBJECT cr {
     z_srl_cr SREL cr
       
       DISPLAY_NAME "Chamado relacionado";
+    z_srl_fluxo SREL zfluxo;
   };
 };
 
@@ -576,6 +577,7 @@ OBJECT z_tipo_trat_espec {
 
 ////////////////////////////////////////////////////////////////////////
 // Fábrica:   zfluxo (Modelo de aprovação)
+// Descrição: Fac_Attr_Entry zfluxo
 ////////////////////////////////////////////////////////////////////////
 
 OBJECT zfluxo {
@@ -638,6 +640,7 @@ OBJECT zmodpasso {
 
 ////////////////////////////////////////////////////////////////////////
 // Fábrica:   zpasso (Passo de Aprovação)
+// Descrição: Fac_Attr_Entry zpasso
 ////////////////////////////////////////////////////////////////////////
 
 OBJECT zpasso {
