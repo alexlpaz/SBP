@@ -46,47 +46,18 @@ function unloadActions()
 
 <SCRIPT LANGUAGE="JavaScript">
 
-function zenable(val) 
-{
-    document.getElementById("dflnk_1_0").style.display="none";
-    document.getElementById("df_1_0").style.display="none";
-    document.getElementById("dflnk_2_0").style.display="none";
-    document.getElementById("df_2_0").style.display="none";
-    document.getElementById("dflnk_3_0").style.display="none";
-    document.getElementById("df_3_0").style.display="none";
-    document.getElementById("dflnk_4_0").style.display="none";
-    document.getElementById("df_4_0").style.display="none";
-    document.getElementById("req_5_0").style.display="none";
-    document.getElementById("df_5_0").style.display="none";    
-    
-    if(val!=0) {
-        var x;
-        if(val == "Contato") x=1;
-        if(val == "Grupo") x=2;
-        if(val == "Contato de Objeto") x=3;
-        if(val == "Organização")x=4;
-        if(val == "Regra") x=5;    
-        
-        if(x!=5) document.getElementById("dflnk_"+x+"_0").style.display="block";
-        else document.getElementById("req_5_0").style.display="block";
-        
-        document.getElementById("df_"+x+"_0").style.display="block";
-    }
-}
-
-
 <PDM_MACRO NAME=dtlForm factory="zmodpasso">
 <PDM_MACRO NAME=dtlStart>
-</script>
-<input type="hidden" name="SET.fluxo" value="$args.KEEP.fluxo">
-<script>
+<pdm_if "$args.KEEP.fluxo" != "">
+document.write('<input type="hidden" name="SET.fluxo" value="$args.KEEP.fluxo">');
+</pdm_if>
 <PDM_MACRO name=dtlStartRow>
 <PDM_MACRO name=dtlTextbox hdr="Sequência" attr="sequence" make_required=yes size=20>
-<PDM_MACRO name=dtlDropdown hdr="Tipo do Aprovador" attr="tipoaprovador" make_required=yes evt="onChange=\\\"zenable(this.options[this.selectedIndex].text)\\\"">
+<PDM_MACRO name=dtlDropdown hdr="Tipo do Aprovador" attr="tipoaprovador" make_required=yes>
 <PDM_MACRO name=dtlCheckbox hdr="Paralelo" attr="grpstep">
 <PDM_MACRO name=dtlCheckbox hdr="Desativado?" attr="delete_flag">
 
-if(_dtl.edit == true) {
+
     <PDM_MACRO name=dtlStartRow>
     <PDM_MACRO name=dtlLookup hdr="Contato" attr="cnt" size=40>
     <PDM_MACRO name=dtlStartRow>
@@ -97,30 +68,7 @@ if(_dtl.edit == true) {
     <PDM_MACRO name=dtlLookup hdr="Organização" attr="org" size=40>
     <PDM_MACRO name=dtlStartRow>
     <PDM_MACRO name=dtlTextbox hdr="Regra" attr="apprule" rows="4" size="60">
-}
-else {
-    if("$args.tipoaprovador.sym" == "Contato") {
-    <PDM_MACRO name=dtlStartRow>
-    <PDM_MACRO name=dtlLookup hdr="Contato" attr="cnt" size=40>
-    }
-    if("$args.tipoaprovador.sym" == "Grupo") {
-    <PDM_MACRO name=dtlStartRow>
-    <PDM_MACRO name=dtlLookup hdr="Grupo" attr="grp" size=40>
-    }
-    if("$args.tipoaprovador.sym" == "Contato de Objeto") {
-    <PDM_MACRO name=dtlStartRow>
-    <PDM_MACRO name=dtlLookup hdr="Contato de Objeto" attr="ntfl" size=40>
-    }
-    if("$args.tipoaprovador.sym" == "Organização") {
-    <PDM_MACRO name=dtlStartRow>
-    <PDM_MACRO name=dtlLookup hdr="Organização" attr="org" size=40>
-    }
-    if("$args.tipoaprovador.sym" == "Regra") {
-    <PDM_MACRO name=dtlStartRow>
-    <PDM_MACRO name=dtlTextbox hdr="Regra" attr="apprule" rows="4" size="60">
-    }
-}
-<PDM_MACRO name=dtlStartRow>
+
 
 <PDM_MACRO NAME=dtlEndTable>
 </SCRIPT>
@@ -129,10 +77,6 @@ else {
 
 
 <PDM_INCLUDE FILE=std_footer.htmpl>
-<script language="javascript">
-if(_dtl.edit == true && "$args.tipoaprovador.sym" != "") zenable("$args.tipoaprovador.sym"); 
-else if(_dtl.edit==true) zenable(0); 
-</script>
 </BODY>
 </HTML>
 

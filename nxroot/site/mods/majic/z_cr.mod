@@ -71,3 +71,11 @@ MODIFY cr POST_CI z_encerra_ciclo_vida( persistent_id, assignee, group, status, 
   
 MODIFY cr POST_CI z_cr_marca_violacoes ( persistent_id, sla_violation )
   7180 FILTER (EVENT(UPDATE) && (z_int_slo{} || sla_violation{} )) ;
+
+//associa o fluxo de app no insert da req ou na troca de categoria
+MODIFY cr POST_CI z_cr_associa_app ( persistent_id, category )
+  7200 FILTER (EVENT("INSERT UPDATE") && (category{} )) ;
+
+//cancela o fluxo de app caso a req tenha sido rejeitada
+MODIFY cr POST_CI z_cr_cancela_app ( persistent_id )
+  7210 FILTER (EVENT("UPDATE") && (status{->'REJ'} )) ;

@@ -44,11 +44,23 @@ function unloadActions()
 <PDM_MACRO NAME=dtlForm factory="zpasso">
 <PDM_MACRO NAME=dtlStart>
 <PDM_MACRO name=dtlStartRow>
-<PDM_MACRO name=dtlTextbox hdr="Sequência" attr="sequence" size=20>
-<PDM_MACRO name=dtlLookup hdr="Aprovador" attr="approver">
-<PDM_MACRO name=dtlTextbox hdr="Status" attr="status">
+<PDM_MACRO name=dtlReadonly hdr="Sequência" attr="sequence">
+
+<PDM_MACRO name=dtlReadonly hdr="Aprovador" attr="approver">
+if(_dtl.edit) {
+detailDropdown("Status","status","",1,20,"1","","","yes","","","","","no","0","","","Aprovado@,@APP@,@Rejeitado@,@REJ");
+}
+else {
+<pdm_if "$args.status" == "AWP">
+detailTextboxReadonly("Status","status",1,'Aguardando Aprovação', "",void(0), void(0), void(0), "", "", "no"); 
+<pdm_elif "$args.status" == "APP">
+detailTextboxReadonly("Status","status",1,'Aprovado', "",void(0), void(0), void(0), "", "", "no");
+<pdm_elif "$args.status" == "REJ">
+detailTextboxReadonly("Status","status",1,'Rejeitado', "",void(0), void(0), void(0), "", "", "no");
+</pdm_if>
+} 
 <PDM_MACRO name=dtlStartRow>
-<PDM_MACRO name=dtlTextbox hdr="Comentários" attr="comments" rows="4" size="60">
+<PDM_MACRO name=dtlTextbox hdr="Comentários" attr="comments" rows="4" size="60" colspan=3 make_required=yes>
 <PDM_MACRO NAME=dtlEndTable>
 </SCRIPT>
 

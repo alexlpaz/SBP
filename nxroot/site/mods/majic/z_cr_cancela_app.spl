@@ -1,0 +1,127 @@
+////////////////////////////////////////////////////////////////////////
+// Method:      z_cr_cancela_app
+// Author:      Lucas Guimaraes
+// Created:     
+// Use Case:    Spec X.X - UC 1.1.1.1
+// Modified by: 
+// Modified:
+//
+// Description: cancela o fluxo de app caso a req tenha ido pra rejeitada
+//
+// Parameters:  
+//              persid
+//
+////////////////////////////////////////////////////////////////////////
+cr::z_cr_cancela_app(...)
+{
+    
+    
+	int zi, zi_depurar;
+	string zs_metodo;
+	zs_metodo = 'z_cr_cancela_app - ';
+
+    // Alterar valor zi_depurar parar 1 para debug mode
+    zi_depurar = 1;
+        
+    // Entrada para debug mode
+    if ( zi_depurar==1 ) { 
+        logf(SIGNIFICANT, "============================================================="); 
+        logf(SIGNIFICANT, "%s Inicio - $s", zs_metodo, (string) now());
+        logf(SIGNIFICANT, "%s User - '%s'", zs_metodo, thread_userid());
+        logf(SIGNIFICANT, "%s ARG Count : %d", zs_metodo, argc);
+        for (zi=0; zi<argc; zi+=1) {
+            logf(SIGNIFICANT, "%s ARG #%s : %s", zs_metodo, (string) zi, (string) argv[zi]);          
+        } ;
+        logf(SIGNIFICANT, "============================================================="); 
+    } ;      
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Inicio do codigo
+    string zs_msg, zs_campo, zs_valor, zs_wc, zs_status, zs_persid,zs_aux;
+    object zo_groupLeader, zo_cr, zo_lista, zo_item;
+    int zi_lista, zi_index;
+    
+    zs_persid = (string) argv[3];
+    
+//parte 0: bloqueio para o que nao eh request. retirar/alterar quando entrar pra incidentes e/ou problemas
+    zs_aux = (string) expand(format("&{%s = cr.persistent_id->type}", zs_persid ) );
+    if(zs_aux != "R") return;
+//    
+    
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Buscando os passos ainda pendentes", zs_metodo ); } ;
+    
+    //Efetua uma busca dos objetos zpasso no banco de dados a partir da clausula definida em zs_wc
+    zs_wc = format("cr = '%s' AND status='AWP'",zs_persid );
+    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lista de zpasso: %s", zs_metodo,  zs_wc); } ;        
+    send_wait( 0, top_object(), "call_attr", "zpasso", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao definir lista de zpasso's: %s", zs_metodo,  msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    } ;
+    zo_lista = msg[0] ;
+    zi_lista = (int) msg[1] ;   
+    
+    for ( zi_index = 0 ; zi_index < zi_lista; zi_index ++) { //Itera pelos items da zi_lista
+        
+        //Pega o zi_index item da lisat zo_lista
+        send_wait( 0, zo_lista, "dob_by_index", "DEFAULT", zi_index, zi_index);
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao identificar Grupo: %s", zs_metodo,  msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } ;
+        zo_item = msg[0];
+        
+        //Cria um group leader
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Instanciando GL", zs_metodo ); } ;
+        send_wait(0, top_object(), "get_co_group");
+        if (msg_error()) {
+            logf(ERROR, "%s Erro ao instanciar GL: '%s'", msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        }
+        zo_groupLeader = msg[0];
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Group leader: '%s'", zs_metodo, (string) zo_groupLeader ); } ;    
+        
+        //Faz o checkout do objeto zo_objeto
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro", zs_metodo ); } ;	
+        send_wait(0, zo_groupLeader, "checkout", zo_item); 
+        if ( msg_error() ) {
+        	zs_msg = format("%s Outras pessoas estão editando o registro %s - Não foi possível travar para gravação o registro.", (string) zo_item, zs_metodo )  ;
+        	set_error(1);
+        	set_return_data(zs_msg);
+            z_bloco_fim(zi_depurar, zs_metodo);                
+            return;
+        } ;
+        
+        //Define o valor zs_valor no campo zs_campo do objeto 
+        zs_campo = "status";
+        zs_valor = "CAN";
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo valor: '%s' no campo '%s'", zs_metodo, zs_valor, zs_campo ); } ;
+        send_wait(0, zo_item, "call_attr", zs_campo, "set_val", zs_valor, "SURE_SET");
+        if ( msg_error() ) {
+            logf(ERROR, "%s ERRO ao persistir valor: %s", zs_metodo,  msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Valor persistido com sucesso", zs_metodo ); } ;
+        } ;
+        
+        // Faz o checkin do objeto zo_cr
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo o objeto no banco", zs_metodo ); } ;	
+        send_wait(0, zo_groupLeader, "checkin", zo_item); 
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao persistir valor: %s", zs_metodo, msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } ;
+
+        
+    } ; //Fim do for que Itera pelos items da zi_lista
+            
+
+    // Fim do codigo
+    ///////////////////////////////////////////////////////////////////////////////////////
+	z_bloco_fim(zi_depurar, zs_metodo);
+
+} ;
