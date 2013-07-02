@@ -39,13 +39,20 @@ zpasso::z_zpasso_status(...)
     } ;      
     ///////////////////////////////////////////////////////////////////////////////////////
     // Inicio do codigo
-    string zs_msg, zs_campo, zs_valor, zs_wc, zs_status, zs_persid,zs_cr,zs_statusPasso;
-    object zo_groupLeader, zo_cr, zo_lista, zo_item;
+    string zs_msg, zs_campo, zs_valor, zs_wc, zs_status, zs_persid,zs_cr,zs_statusPasso,zs_com;
+    object zo_groupLeader, zo_cr, zo_lista, zo_item,zo_alg;
     int zi_lista, zi_index,zi_counterAWP,zi_counterREJ,zi_counterAPP,zi_controle;
     
     zs_persid = (string) argv[3];
     zs_cr = (string) argv[6];
     zs_statusPasso = (string) argv[9];
+    
+    uuid login_userid;
+    send_wait(0, top_object(), "call_attr", "cr", "current_user_id");
+    login_userid = msg[0];
+    
+    zs_com = (string) expand(format("&{%s = zpasso.persistent_id->comments}", zs_persid ) );
+    
     zi_counterAPP = 0;
     zi_counterREJ = 0;
     zi_counterAWP = 0;
@@ -158,6 +165,107 @@ zpasso::z_zpasso_status(...)
             z_bloco_fim(zi_depurar, zs_metodo);
             return;
         } ;
+        
+        //grava a log caso seja rejeitada...
+        //Cria novo dob "isscat"
+        //Cria um group leader
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Instanciando GL", zs_metodo ); } ;
+        send_wait(0, top_object(), "get_co_group");
+        if (msg_error()) {
+            logf(ERROR, "%s Erro ao instanciar GL: '%s'", msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        }
+        zo_groupLeader = msg[0];
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Group leader: '%s'", zs_metodo, (string) zo_groupLeader ); } ;    
+        
+        
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Submete get_new_dob", zs_metodo); } ;        
+        send_wait( 0, top_object(), "call_attr", "alg", "get_new_dob", "alg", zo_groupLeader, zo_groupLeader);
+        if (msg_error()) {
+            logf(ERROR, "%s Erro ao criar alg: '%s'", zs_metodo, msg[0]);
+            return;
+        }
+        zo_alg = msg[0];
+        
+        //Faz o checkout do objeto zo_objeto
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro", zs_metodo ); } ;	
+        send_wait(0, zo_groupLeader, "checkout", zo_alg); 
+        if ( msg_error() ) {
+        	zs_msg = format("%s Outras pessoas estão editando o registro %s - Não foi possível travar para gravação o registro.", (string) zo_alg zs_metodo )  ;
+        	set_error(1);
+        	set_return_data(zs_msg);
+            z_bloco_fim(zi_depurar, zs_metodo);                
+            return;
+        } ;
+        
+        //Define o valor zs_valor no campo zs_campo do objeto 
+        zs_campo = "call_req_id";
+        zs_valor = zs_cr;
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo valor: '%s' no campo '%s'", zs_metodo, zs_cr, zs_campo ); } ;
+        send_wait(0, zo_alg, "call_attr", zs_campo, "set_val", zs_cr, "SURE_SET");
+        if ( msg_error() ) {
+            logf(ERROR, "%s ERRO ao persistir valor: %s", zs_metodo,  msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Valor persistido com sucesso", zs_metodo ); } ;
+        } ;
+        
+        //Define o valor zs_valor no campo zs_campo do objeto 
+        zs_campo = "type";
+        zs_valor = "LOG";
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo valor: '%s' no campo '%s'", zs_metodo, zs_valor, zs_campo ); } ;
+        send_wait(0, zo_alg, "call_attr", zs_campo, "set_val", zs_valor, "SURE_SET");
+        if ( msg_error() ) {
+            logf(ERROR, "%s ERRO ao persistir valor: %s", zs_metodo,  msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Valor persistido com sucesso", zs_metodo ); } ;
+        } ;
+        
+        //Define o valor zs_valor no campo zs_campo do objeto 
+        zs_campo = "analyst";
+        zs_valor = (string) login_userid;
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo valor: '%s' no campo '%s'", zs_metodo, zs_valor, zs_campo ); } ;
+        send_wait(0, zo_alg, "call_attr", zs_campo, "set_val", login_userid, "SURE_SET");
+        if ( msg_error() ) {
+            logf(ERROR, "%s ERRO ao persistir valor: %s", zs_metodo,  msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Valor persistido com sucesso", zs_metodo ); } ;
+        } ;
+        
+        //Define o valor zs_valor no campo zs_campo do objeto 
+        zs_campo = "description";
+        zs_valor = zs_com;
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo valor: '%s' no campo '%s'", zs_metodo, zs_valor, zs_campo ); } ;
+        send_wait(0, zo_alg, "call_attr", zs_campo, "set_val", zs_valor, "SURE_SET");
+        if ( msg_error() ) {
+            logf(ERROR, "%s ERRO ao persistir valor: %s", zs_metodo,  msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Valor persistido com sucesso", zs_metodo ); } ;
+        } ;
+        
+        
+        
+        // Faz o checkin do objeto zo_cr
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo o objeto no banco", zs_metodo ); } ;	
+        send_wait(0, zo_groupLeader, "checkin", zo_alg); 
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao persistir valor: %s", zs_metodo, msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } ;
+        
+         
+        
+        
+        //
 
     }
     else {

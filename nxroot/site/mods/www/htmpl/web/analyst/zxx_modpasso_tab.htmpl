@@ -76,7 +76,7 @@ function add_button_to_tab_banner(){
 <PDM_IF "$prop.form_name_3" != "edit">
 <PDM_MACRO name=button caption="Inserir" func="do_insert_tasks()" hotkey_name="Inserir" id=btn909 width=120>
 <PDM_ELSE>
-<PDM_MACRO name=button caption="Inserir tarefas[s]" disabled=yes func="do_insert_tasks()" hotkey_name="Insert Tasks[I]" id=btn909 width=120>
+<PDM_MACRO name=button caption="Inserir" disabled=yes func="do_insert_tasks()" hotkey_name="Insert Tasks[I]" id=btn909 width=120>
 </PDM_IF>
 
 <PDM_MACRO name=btnEndRow>
@@ -122,7 +122,7 @@ var wfhtml, wflnkid = -1;
 <PDM_MACRO name=dtlStartDiv divid="ShowTaskTable" style="visibility:visible">
 
 
-<PDM_MACRO name=tabList btntitle="Carregar lista de tarefas de fluxo de trabalho de ocorrência." height=300 src="OP=SEARCH+FACTORY=zmodpasso+QBE.EQ.fluxo=$args.id+QBE.EQ.delete_flag=0">
+<PDM_MACRO name=tabList btntitle="Carregar lista de passos" height=300 src="OP=SEARCH+FACTORY=zmodpasso+QBE.EQ.fluxo=$args.id+QBE.EQ.delete_flag=0">
 
 <PDM_MACRO name=dtlEndTable>
 <PDM_MACRO name=dtlEndDiv>
