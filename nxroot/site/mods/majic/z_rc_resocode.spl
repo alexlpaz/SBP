@@ -1,0 +1,123 @@
+////////////////////////////////////////////////////////////////////////
+// Method:      z_rc_resocode
+// Author:      Alex Paz
+// Created:     Monday, July 01, 2013 6:39:53 PM
+// Use Case:    Spec X.X - UC 1.1.1.1
+// Modified by: 
+// Modified:
+//
+// Description: Cria/Atualiza código de resolução a partir da criação/edição da causa raiz 
+//
+//
+////////////////////////////////////////////////////////////////////////
+rc::z_rc_resocode(...)
+{    
+	int zi, zi_depurar;
+	string zs_metodo;
+	zs_metodo = 'z_rc_resocode - ';
+
+    // Alterar valor zi_depurar parar 1 para debug mode
+    zi_depurar = 0;
+        
+    // Entrada para debug mode
+    if ( zi_depurar==1 ) { 
+        logf(SIGNIFICANT, "============================================================="); 
+        logf(SIGNIFICANT, "%s Inicio - $s", zs_metodo, (string) now());
+        logf(SIGNIFICANT, "%s User - '%s'", zs_metodo, thread_userid());
+        logf(SIGNIFICANT, "%s ARG Count : %d", zs_metodo, argc);
+        for (zi=0; zi<argc; zi+=1) {
+            logf(SIGNIFICANT, "%s ARG #%s : %s", zs_metodo, (string) zi, (string) argv[zi]);          
+        } ;
+        logf(SIGNIFICANT, "============================================================="); 
+    } ;      
+    ///////////////////////////////////////////////////////////////////////////////////////
+    // Inicio do codigo
+    string zs_msg, zs_campo, zs_valor, zs_wc, zs_status, zs_persid, zs_persid_resocode;
+    object zo_groupLeader, zo_rc, zo_lista, zo_item, zo_resocode;
+    int zi_lista, zi_index, zi_resocode, zi_id_rc, zi_alterou;
+
+    zi_id_rc = argv[3];
+    zs_persid = format("rc:%s",(string) argv[3]);
+    zi_resocode = argv[6];
+    zs_persid_resocode = format("resocode:%s",(string) zi_resocode);
+    zi_alterou = 0;
+
+    send_wait(0, top_object(), "get_co_group");
+    if (msg_error()) {
+        logf(ERROR, "%s Erro ao instanciar GL: '%s'", msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    }
+    zo_groupLeader = msg[0];
+
+    send_wait (0, top_object(), "call_attr", "rc", "dob_by_persid", NULL, zs_persid);
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao instanciar objeto: %s", zs_metodo,  msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    } ;
+    zo_rc=msg[0];
+
+    zs_wc = format("z_srl_rc=%s", zi_id_rc );
+    send_wait( 0, top_object(), "call_attr", "resocode", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao definir lista de resocode's: %s", zs_metodo,  msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    } ;
+    zo_lista = msg[0] ;
+    zi_lista = (int) msg[1] ;   
+    
+    if ( zi_lista == 0 ) {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Criando codigo de resolucao para a causa raiz %s", zs_metodo, zo_rc.sym); } ;
+        send_wait( 0, top_object(), "call_attr", "resocode", "get_new_dob", NULL, NULL, zo_groupLeader);
+        if (msg_error()) {
+            logf(ERROR, "%s Erro ao criar resocode: '%s'", zs_metodo, msg[0]);
+            return;
+        }
+        zo_resocode = msg[0];
+        zo_resocode.z_srl_rc=zi_id_rc;
+        zo_resocode.sym=zo_rc.sym;
+        zo_resocode.description=zo_rc.description;
+        zo_resocode.delete_flag=zo_rc.delete_flag;
+        zi_alterou = 1;        
+    } else { 
+        if (!is_null(zi_resocode)) {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Instanciando codigo de resolucao para alteracoes", zs_metodo ); } ;        
+            send_wait (0, top_object(), "call_attr", "resocode", "dob_by_persid", NULL, zs_persid_resocode);
+            if ( msg_error() ) {
+                logf(ERROR, "%s Erro ao instanciar objeto: %s", zs_metodo,  msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);
+                return;
+            } ;
+            zo_resocode=msg[0];
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro", zs_metodo ); } ;	
+            send_wait(0, zo_groupLeader, "checkout", zo_resocode); 
+            if ( msg_error() ) {
+                logf(ERROR, "%s Erro ao bloquear codigo de resolucao: %s", zs_metodo,  msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);                
+                return;
+            } ;
+            send_wait(0, zo_resocode, "call_attr", "sym", "set_val", zo_rc.sym, "SURE_SET");
+            send_wait(0, zo_resocode, "call_attr", "description", "set_val", zo_rc.description, "SURE_SET");
+            send_wait(0, zo_resocode, "call_attr", "delete_flag", "set_val", zo_rc.delete_flag, "SURE_SET");
+            zi_alterou = 1;
+        } else {
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Causa raiz sem Codigo de resolucao relacionado", zs_metodo ); } ;
+        } ;
+    } ;
+    if (zi_alterou == 1) {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo o objeto no banco", zs_metodo ); } ;	
+        send_wait(0, zo_groupLeader, "checkin"); 
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao persistir valor: %s", zs_metodo, msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } ;
+    } ;
+    
+    // Fim do codigo
+    ///////////////////////////////////////////////////////////////////////////////////////
+	z_bloco_fim(zi_depurar, zs_metodo);
+} ;
+

@@ -782,7 +782,7 @@ if ( cfgUserAuth \> 1 && ahdtop.cfgNX_KT == "Yes" && ahdtop.cfgEBRVersion == "SE
 //*************************************
 // Friday, June 21, 2013 11:33:13 AM - Alex Paz 
 // Botões customizados
-<PDM_IF "$args.resolve_date" == "" && "$args.z_srl_cr" == "" && "$prop.form_name_3" != "edit">
+<PDM_IF "$args.status.resolved" == "0" && "$args.status.active" == "1" && "$args.z_srl_cr" == "" && "$prop.form_name_3" != "edit">
 if ( cfgUserAuth \> 1 ) {
 ImgBtnRow();
 <PDM_MACRO name=button caption="Criar ticket relacionado" func="create_new('cr',0,0,0,'PRESET=type:I','PRESET=customer:$cst.id','PRESET=requested_by:$cst.id', 'PRESET=z_srl_cr:$args.persistent_id')" hotkey_name="Create Ticket" id=z_cri_ticket>

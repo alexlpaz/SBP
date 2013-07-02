@@ -1,7 +1,7 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_index.sch
-// Data de publicação: 28/06/2013 12:21:50
-// Usuário publicador: Administrator
+// Data de publicação: 01/07/2013 22:05:35
+// Usuário publicador: ServiceDesk
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
 ////////////////////////////////////////////////////////////////////////

@@ -32,6 +32,14 @@ ADD z_srl_servico
 ADD z_srl_tipo
 END
 
+TABLE Rootcause
+ADD z_srl_resocode
+END
+
+TABLE usp_resolution_code
+ADD z_srl_rc
+END
+
 TABLE serx
 ADD z_srl_hor_crit
 ADD z_srl_hor_func
