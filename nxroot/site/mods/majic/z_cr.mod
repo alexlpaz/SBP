@@ -49,7 +49,7 @@ MODIFY cr POST_CI
 // Description: Replica informações do pai no relacionamento dos filhos 
 MODIFY cr POST_CI
     z_cr_definicoes_filho( persistent_id, parent )
-    7020 FILTER( (EVENT("INSERT UPDATE")) && ( parent{NULL->} ) && type != "P" ) ;     
+    7020 FILTER( (EVENT("INSERT UPDATE")) && ( parent{} && parent != NULL ) && type != "P" ) ;     
 
 // Author:      Alex Paz - Friday, June 26, 2013 1:47:01 AM
 // Description: Incrementa o controle no ticket ao redirecionar para outro grupo
