@@ -8,9 +8,6 @@ TABLE wsptbl
 	"3183EBBE79549F46BC62232A2520F01C" ,"05/20/2013 13:46:43" ,"",
 	"wsptbl:400003" ,"code" ,"z_tipo_trat_espec" ,"" ,"" ,"" ,"3",
 	"z_tipo_trat_espec" ,"0" ,"0" ,"" }
-	{ "" ,"" ,"" ,"" ,"Histórico de Níveis de Serviço" ,"" ,"400004" ,"0",
-	"1" ,"3183EBBE79549F46BC62232A2520F01C" ,"05/20/2013 16:34:08" ,"",
-	"wsptbl:400004" ,"" ,"z_cr_slo" ,"" ,"" ,"" ,"3" ,"z_cr_slo" ,"0" ,"0" ,"" }
 	{ "sym" ,"" ,"Categoria do Serviço." ,"" ,"Categoria do Serviço",
 	"ci_reference" ,"400005" ,"0" ,"1" ,"3183EBBE79549F46BC62232A2520F01C",
 	"06/18/2013 15:16:18" ,"" ,"wsptbl:400005" ,"code" ,"z_srv_categoria" ,"",
@@ -38,6 +35,9 @@ TABLE wsptbl
 	"3183EBBE79549F46BC62232A2520F01C" ,"06/18/2013 18:17:43" ,"",
 	"wsptbl:400012" ,"code" ,"z_srv_subcat2" ,"" ,"" ,"" ,"3" ,"z_srv_subcat2",
 	"0" ,"0" ,"" }
+	{ "" ,"" ,"" ,"" ,"Códigos de encaminhamento" ,"" ,"400013" ,"0" ,"1",
+	"C19D90AC3C81F54DA82C523711A010D9" ,"06/19/2013 14:56:00" ,"",
+	"wsptbl:400013" ,"" ,"ztransfcode" ,"" ,"" ,"" ,"3" ,"ztransfcode" ,"0" ,"0" ,"" }
 	{ "" ,"" ,"" ,"" ,"Tipo de Organização" ,"" ,"400014" ,"0" ,"1",
 	"3183EBBE79549F46BC62232A2520F01C" ,"06/20/2013 15:10:05" ,"",
 	"wsptbl:400014" ,"" ,"z_tipo_org" ,"" ,"" ,"" ,"3" ,"z_tipo_org" ,"0" ,"0" ,"" }
@@ -52,11 +52,6 @@ TABLE wsptbl
 	"0" ,"1" ,"3183EBBE79549F46BC62232A2520F01C" ,"06/27/2013 12:29:39" ,"",
 	"wsptbl:400020" ,"" ,"ztipoaprovador" ,"" ,"" ,"" ,"3" ,"ztipoaprovador",
 	"0" ,"0" ,"" }
-	{ "sym" ,"" ,"Fac_Attr_Entry ztransfcode" ,"",
-	"Códigos de encaminhamento" ,"" ,"400021" ,"0" ,"1",
-	"3183EBBE79549F46BC62232A2520F01C" ,"06/27/2013 14:32:20" ,"",
-	"wsptbl:400021" ,"id" ,"ztransfcode" ,"" ,"" ,"" ,"3" ,"ztransfcode" ,"0",
-	"0" ,"" }
 	{ "sequence" ,"" ,"Fac_Attr_Entry zpasso" ,"" ,"Passo de Aprovação",
 	"call_mgr_reference" ,"400022" ,"0" ,"1" ,"3183EBBE79549F46BC62232A2520F01C",
 	"06/28/2013 10:26:38" ,"" ,"wsptbl:400022" ,"id" ,"zpasso" ,"" ,"" ,"" ,"3",
@@ -69,3 +64,11 @@ TABLE wsptbl
 	"Modelo de Passo de Aprovação" ,"call_mgr_reference" ,"400024" ,"0" ,"1",
 	"3183EBBE79549F46BC62232A2520F01C" ,"06/28/2013 12:03:15" ,"",
 	"wsptbl:400024" ,"id" ,"zmodpasso" ,"" ,"" ,"" ,"3" ,"zmodpasso" ,"0" ,"0" ,"" }
+	{ "id" ,"" ,"Fac_Attr_Entry z_cr_slo" ,"",
+	"Histórico de Níveis de Serviço" ,"" ,"400025" ,"0" ,"1",
+	"3183EBBE79549F46BC62232A2520F01C" ,"07/02/2013 11:24:23" ,"",
+	"wsptbl:400025" ,"id" ,"z_cr_slo" ,"" ,"" ,"" ,"3" ,"z_cr_slo" ,"0" ,"0" ,"" }
+	{ "" ,"" ,"" ,"" ,"Tipo de Solução" ,"" ,"400026" ,"0" ,"1",
+	"3183EBBE79549F46BC62232A2520F01C" ,"07/02/2013 11:24:23" ,"",
+	"wsptbl:400026" ,"" ,"z_tipo_solucao" ,"" ,"" ,"" ,"3" ,"z_tipo_solucao",
+	"0" ,"0" ,"" }
