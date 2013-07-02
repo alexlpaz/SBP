@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_schema.sch
-// Data de publicação: 02/07/2013 11:24:23
+// Data de publicação: 02/07/2013 14:37:35
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -269,6 +269,7 @@ TABLE zpasso {
   orgapprover	UUID REF ca_organization;
   sequence	INTEGER;
   status	STRING 3;
+  tipoaprovador	INTEGER REF ztipoaprovador;
 }
 
 p1 zpasso -> CURR_PROV zpasso;

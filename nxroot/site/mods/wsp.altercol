@@ -185,6 +185,7 @@ ADD grpstep
 ADD orgapprover
 ADD sequence
 ADD status
+ADD tipoaprovador
 END
 
 TABLE ztipoaprovador

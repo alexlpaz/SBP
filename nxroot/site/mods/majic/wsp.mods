@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp.mods
-// Data de publicação: 02/07/2013 11:24:23
+// Data de publicação: 02/07/2013 14:37:35
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -176,7 +176,6 @@ OBJECT z_cr_cat_org {
 
 ////////////////////////////////////////////////////////////////////////
 // Fábrica:   z_cr_slo (Histórico de Níveis de Serviço)
-// Descrição: Fac_Attr_Entry z_cr_slo
 ////////////////////////////////////////////////////////////////////////
 
 OBJECT z_cr_slo {
@@ -233,7 +232,6 @@ OBJECT z_cr_slo {
       RLIST OFF;
     };
     REL_ATTR id;
-    COMMON_NAME id;
   };
 };
 
@@ -727,6 +725,7 @@ OBJECT zpasso {
     orgapprover SREL org;
     sequence INTEGER;
     status STRING 3;
+    tipoaprovador SREL ztipoaprovador;
     last_mod_dt DATE { ON_CI SET NOW; };
     last_mod_by SREL cnt { ON_CI SET USER;
                            ON_NEW DEFAULT USER; };
@@ -776,6 +775,7 @@ OBJECT ztipoaprovador {
 
 ////////////////////////////////////////////////////////////////////////
 // Fábrica:   ztransfcode (Códigos de encaminhamento)
+// Descrição: Fac_Attr_Entry ztransfcode
 ////////////////////////////////////////////////////////////////////////
 
 OBJECT ztransfcode {
@@ -806,5 +806,6 @@ OBJECT ztransfcode {
       RLIST OFF;
     };
     REL_ATTR id;
+    COMMON_NAME sym;
   };
 };
