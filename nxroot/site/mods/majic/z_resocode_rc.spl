@@ -1,19 +1,20 @@
 ////////////////////////////////////////////////////////////////////////
-// Method:      z_cr_definicoes_filho
+// Method:      z_resocode_rc
 // Author:      Alex Paz
-// Created:     Monday, June 24, 2013 12:20:04 PM
+// Created:     Monday, July 01, 2013 7:59:22 PM
 // Use Case:    Spec X.X - UC 1.1.1.1
 // Modified by: 
 // Modified:
 //
-// Description: Replica informações do pai no relacionamento dos filhos
+// Description: Atualiza relacionamento cauza raiz --> código de resolução a partir da criação da causa raiz
+//
 //
 ////////////////////////////////////////////////////////////////////////
-cr::z_cr_definicoes_filho(...)
-{    
+resocode::z_resocode_rc(...)
+{   
 	int zi, zi_depurar;
 	string zs_metodo;
-	zs_metodo = 'z_cr_definicoes_filho - ';
+	zs_metodo = 'z_resocode_rc - ';
 
     // Alterar valor zi_depurar parar 1 para debug mode
     zi_depurar = 0;
@@ -31,12 +32,13 @@ cr::z_cr_definicoes_filho(...)
     } ;      
     ///////////////////////////////////////////////////////////////////////////////////////
     // Inicio do codigo
-    string zs_msg, zs_analista_pai, zs_grupo_pai, zs_status_pai, zs_persid, zs_persid_pai;
-    object zo_groupLeader, zo_cr, zo_cr_pai, zo_lista, zo_item;
-    int zi_lista, zi_index, zi_resocode_pai;
+    string zs_msg, zs_campo, zs_valor, zs_wc, zs_status, zs_persid;
+    object zo_groupLeader, zo_cr, zo_lista, zo_rootcause;
+    int zi_lista, zi_index, zi_id_rc, zi_id_resocode;
     
-    zs_persid=(string)argv[3];
-    zs_persid_pai=(string)argv[6];
+    zi_id_resocode = argv[3];
+    zi_id_rc = argv[6];
+    zs_persid = format("rc:%s",(string)zi_id_rc);
     
     //Cria um group leader
     if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Instanciando GL", zs_metodo ); } ;
@@ -48,64 +50,33 @@ cr::z_cr_definicoes_filho(...)
     }
     zo_groupLeader = msg[0];
     if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Group leader: '%s'", zs_metodo, (string) zo_groupLeader ); } ;    
-    
-    //Instancia o objeto  pelo seu persid e o atribui a variável zo_cr
-    send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, zs_persid);
+     
+    send_wait (0, top_object(), "call_attr", "rc", "dob_by_persid", NULL, zs_persid);
     if ( msg_error() ) {
         logf(ERROR, "%s Erro ao instanciar objeto: %s", zs_metodo,  msg[0]);
         z_bloco_fim(zi_depurar, zs_metodo);
         return;
     } ;
-    zo_cr=msg[0];
-    
-    //Instancia o objeto  pelo seu persid e o atribui a variável zo_cr_pai
-    send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, zs_persid_pai);
-    if ( msg_error() ) {
-        logf(ERROR, "%s Erro ao instanciar objeto: %s", zs_metodo,  msg[0]);
-        z_bloco_fim(zi_depurar, zs_metodo);
-        return;
-    } ;
-    zo_cr_pai=msg[0];
-    send_wait(0, zo_cr_pai, "get_attr_vals",4,"status","assignee","group","resolution_code");
-    zs_status_pai=(string) msg[3];
-    zs_analista_pai=(string) msg[6];
-    zs_grupo_pai=(string) msg[9];
-    zi_resocode_pai=(int) msg[12];
-    
+    zo_rootcause=msg[0];
     //Faz o checkout do objeto zo_objeto
     if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro", zs_metodo ); } ;	
-    send_wait(0, zo_groupLeader, "checkout", zo_cr); 
+    send_wait(0, zo_groupLeader, "checkout", zo_rootcause); 
     if ( msg_error() ) {
-        sleep(3);
-        send_wait(0, zo_groupLeader, "checkout", zo_cr);
-        if ( msg_error() ) {
-            sleep(5);
-            send_wait(0, zo_groupLeader, "checkout", zo_cr);
-            if ( msg_error() ) {
-                logf(ERROR, "%s Erro ao bloquear ticket %s: %s", zs_metodo, zo_cr.ref_num, msg[0]);
-                z_bloco_fim(zi_depurar, zs_metodo);                
-                return;
-            } ;
-        } ;
+        logf(ERROR, "%s Erro ao bloquear causa raiz %s: %s", zs_metodo, zo_rootcause.sym);
+        z_bloco_fim(zi_depurar, zs_metodo);                
+        return;
     } ;
-    send_wait(0, zo_cr, "call_attr", "group", "set_val", zs_grupo_pai, "SURE_SET");
-    send_wait(0, zo_cr, "call_attr", "assignee", "set_val", zs_analista_pai, "SURE_SET");
-    send_wait(0, zo_cr, "call_attr", "resolution_code", "set_val", zi_resocode_pai, "SURE_SET");
-    if (zo_cr_pai.status != "PEND") {
-        send_wait(0, zo_cr, "call_attr", "status", "set_val", zs_status_pai, "SURE_SET");
-    };
-    // Faz o checkin do objeto zo_cr
+    send_wait(0, zo_rootcause, "call_attr", "z_srl_resocode", "set_val", zi_id_resocode, "SURE_SET");
     if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo o objeto no banco", zs_metodo ); } ;	
-    send_wait(0, zo_groupLeader, "checkin", zo_cr); 
+    send_wait(0, zo_groupLeader, "checkin", zo_rootcause); 
     if ( msg_error() ) {
         logf(ERROR, "%s Erro ao persistir valor: %s", zs_metodo, msg[0]);
         z_bloco_fim(zi_depurar, zs_metodo);
         return;
     } ;
-    
+
     // Fim do codigo
     ///////////////////////////////////////////////////////////////////////////////////////
 	z_bloco_fim(zi_depurar, zs_metodo);
 
 } ;
-

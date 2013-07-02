@@ -1,7 +1,9 @@
 TABLE Act_Log
 ADD z_srl_group
 ADD z_srl_resocode
+ADD z_srl_tipo_solucao
 ADD z_srl_transfcode
+ADD z_str_desc_causa_raiz
 END
 
 TABLE usp_contact
@@ -18,6 +20,8 @@ ADD z_int_sla_viol_atend
 ADD z_int_slo
 ADD z_srl_cr
 ADD z_srl_fluxo
+ADD z_srl_tipo_solucao
+ADD z_str_desc_causa_raiz
 END
 
 TABLE usp_organization
@@ -30,6 +34,14 @@ ADD z_srl_fluxo
 ADD z_srl_impact
 ADD z_srl_servico
 ADD z_srl_tipo
+END
+
+TABLE Rootcause
+ADD z_srl_resocode
+END
+
+TABLE usp_resolution_code
+ADD z_srl_rc
 END
 
 TABLE serx
@@ -124,6 +136,13 @@ ADD delete_flag
 ADD description
 ADD name
 ADD z_srl_niv_hier
+END
+
+TABLE z_tipo_solucao
+ADD code
+ADD delete_flag
+ADD description
+ADD sym
 END
 
 TABLE z_tipo_trat_espec

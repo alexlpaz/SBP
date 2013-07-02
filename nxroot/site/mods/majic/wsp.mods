@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp.mods
-// Data de publicação: 28/06/2013 12:21:50
+// Data de publicação: 02/07/2013 11:24:23
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -18,9 +18,11 @@ OBJECT alg {
     z_srl_resocode SREL resocode
       
       DISPLAY_NAME "Código de resolução intermediário";
+    z_srl_tipo_solucao SREL z_tipo_solucao;
     z_srl_transfcode SREL ztransfcode
       
       DISPLAY_NAME "Código de encaminhamento";
+    z_str_desc_causa_raiz STRING 8000;
   };
 };
 
@@ -66,6 +68,10 @@ OBJECT cr {
       
       DISPLAY_NAME "Chamado relacionado";
     z_srl_fluxo SREL zfluxo;
+    z_srl_tipo_solucao SREL z_tipo_solucao;
+    z_str_desc_causa_raiz STRING 8000
+      
+      DISPLAY_NAME "Descrição da Causa Raiz";
   };
 };
 
@@ -94,6 +100,26 @@ OBJECT pcat {
     z_srl_tipo SREL crt
       
       DISPLAY_NAME "Tipo do chamado";
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Fábrica:   rc
+////////////////////////////////////////////////////////////////////////
+
+OBJECT rc {
+  ATTRIBUTES Rootcause {
+    z_srl_resocode SREL resocode;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
+// Fábrica:   resocode
+////////////////////////////////////////////////////////////////////////
+
+OBJECT resocode {
+  ATTRIBUTES usp_resolution_code {
+    z_srl_rc SREL rc;
   };
 };
 
@@ -150,6 +176,7 @@ OBJECT z_cr_cat_org {
 
 ////////////////////////////////////////////////////////////////////////
 // Fábrica:   z_cr_slo (Histórico de Níveis de Serviço)
+// Descrição: Fac_Attr_Entry z_cr_slo
 ////////////////////////////////////////////////////////////////////////
 
 OBJECT z_cr_slo {
@@ -206,6 +233,7 @@ OBJECT z_cr_slo {
       RLIST OFF;
     };
     REL_ATTR id;
+    COMMON_NAME id;
   };
 };
 
@@ -522,6 +550,35 @@ OBJECT z_tipo_org {
 };
 
 ////////////////////////////////////////////////////////////////////////
+// Fábrica:   z_tipo_solucao (Tipo de Solução)
+////////////////////////////////////////////////////////////////////////
+
+OBJECT z_tipo_solucao {
+  DISPLAY_NAME "Tipo de Solução";
+
+  ATTRIBUTES z_tipo_solucao {
+    code STRING 12
+      WRITE_NEW REQUIRED;
+    delete_flag SREL actbool
+      REQUIRED;
+    description STRING 512;
+    sym STRING 128
+      WRITE_NEW REQUIRED;
+    last_mod_dt DATE { ON_CI SET NOW; };
+    last_mod_by SREL cnt { ON_CI SET USER;
+                           ON_NEW DEFAULT USER; };
+  };
+
+  FACTORY z_tipo_solucao {
+    STANDARD_LISTS {
+      MLIST OFF;
+      RLIST OFF;
+    };
+    REL_ATTR id;
+  };
+};
+
+////////////////////////////////////////////////////////////////////////
 // Fábrica:   z_tipo_trat_espec (Tratamento Especial)
 // Descrição: Fac_Attr_Entry z_tipo_trat_espec
 ////////////////////////////////////////////////////////////////////////
@@ -719,7 +776,6 @@ OBJECT ztipoaprovador {
 
 ////////////////////////////////////////////////////////////////////////
 // Fábrica:   ztransfcode (Códigos de encaminhamento)
-// Descrição: Fac_Attr_Entry ztransfcode
 ////////////////////////////////////////////////////////////////////////
 
 OBJECT ztransfcode {
@@ -750,6 +806,5 @@ OBJECT ztransfcode {
       RLIST OFF;
     };
     REL_ATTR id;
-    COMMON_NAME sym;
   };
 };

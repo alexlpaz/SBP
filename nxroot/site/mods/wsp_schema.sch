@@ -1,6 +1,6 @@
 ////////////////////////////////////////////////////////////////////////
 // Arquivo:      wsp_schema.sch
-// Data de publicação: 28/06/2013 12:21:50
+// Data de publicação: 02/07/2013 11:24:23
 // Usuário publicador: Administrator
 // Descrição:
 //   Modificações no esquema do CA SD mantidas pelo Pintor de tela da web.
@@ -12,7 +12,9 @@
 TABLE Act_Log {
   z_srl_group	UUID REF ca_contact;
   z_srl_resocode	INTEGER REF usp_resolution_code;
+  z_srl_tipo_solucao	INTEGER REF z_tipo_solucao;
   z_srl_transfcode	INTEGER REF ztransfcode;
+  z_str_desc_causa_raiz	STRING 8000;
 }
 
 TABLE usp_contact {
@@ -29,6 +31,8 @@ TABLE Call_Req {
   z_int_slo	INTEGER;
   z_srl_cr	STRING 30 REF Call_Req;
   z_srl_fluxo	INTEGER REF zfluxo;
+  z_srl_tipo_solucao	INTEGER REF z_tipo_solucao;
+  z_str_desc_causa_raiz	STRING 8000;
 }
 
 TABLE usp_organization {
@@ -41,6 +45,14 @@ TABLE Prob_Category {
   z_srl_impact	INTEGER REF Impact;// SRel_Attr_Entry pcat.z_srl_impact
   z_srl_servico	UUID REF ca_owned_resource;
   z_srl_tipo	STRING 10 REF Call_Req_Type;
+}
+
+TABLE Rootcause {
+  z_srl_resocode	INTEGER REF usp_resolution_code;
+}
+
+TABLE usp_resolution_code {
+  z_srl_rc	INTEGER REF Rootcause;
 }
 
 TABLE serx {
@@ -186,6 +198,18 @@ TABLE z_tipo_org {
 }
 
 p1 z_tipo_org -> CURR_PROV z_tipo_org;
+
+TABLE z_tipo_solucao {
+  id	INTEGER UNIQUE KEY;
+  last_mod_dt	 LOCAL_TIME;
+  last_mod_by	 UUID REF ca_contact;
+  code	STRING 12 S_KEY;
+  delete_flag	INTEGER REF Active_Boolean_Table;
+  description	STRING 512;
+  sym	STRING 128 UNIQUE;
+}
+
+p1 z_tipo_solucao -> CURR_PROV z_tipo_solucao;
 
 TABLE z_tipo_trat_espec {
   id	INTEGER UNIQUE KEY;

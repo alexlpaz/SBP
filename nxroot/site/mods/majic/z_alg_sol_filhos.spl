@@ -10,9 +10,7 @@
 //
 ////////////////////////////////////////////////////////////////////////
 alg::z_alg_sol_filhos(...)
-{
-    
-    
+{    
 	int zi, zi_depurar;
 	string zs_metodo;
 	zs_metodo = 'z_alg_sol_filhos - ';
@@ -33,14 +31,26 @@ alg::z_alg_sol_filhos(...)
     } ;      
     ///////////////////////////////////////////////////////////////////////////////////////
     // Inicio do codigo
-    string zs_wc, zs_alg_persid, zs_persid, zs_alg_desc, zs_alg_analyst, zs_alg_action_desc, zs_alg_type;
-    object zo_groupLeader, zo_cr, zo_lista, zo_item, zo_nova_alg, zo_alg;
-    int zi_lista, zi_index, zi_alg_resocode, zi_alg_int;
+    string zs_wc, zs_alg_persid, zs_persid, zs_alg_desc, zs_alg_analyst, zs_alg_action_desc, zs_alg_type, zs_know_tool, zs_know_session, zs_wc_kd;
+    string zs_item_analyst, zs_pai_analyst, zs_item_grupo, zs_pai_group, zs_persid_kd, zs_persid_rootcause;
+    object zo_groupLeader, zo_cr, zo_lista, zo_item, zo_nova_alg, zo_alg, zo_novo_kdlink, zo_lista_kd, zo_item_kd, zo_kd, zo_rc;
+    int zi_lista, zi_index, zi_alg_resocode, zi_alg_int, zi_know_session, zi_lista_kd, zi_id_rootcause, zi_resocode_doc;
+    int zi_item_resocode, zi_pai_resocode, zi_alterou;
     date zd_alg_time;
-   
+    duration zdu_tempo;
+    
     zs_alg_persid=argv[3];
     zs_persid=argv[6];
+    zi_alterou=0;
 
+    send_wait(0, top_object(), "get_co_group");
+    if (msg_error()) {
+        logf(ERROR, "%s Erro ao instanciar GL: '%s'", msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    }
+    zo_groupLeader = msg[0];
+    
     send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, zs_persid);
     if ( msg_error() ) {
         logf(ERROR, "%s Erro ao instanciar objeto: %s", zs_metodo,  msg[0]);
@@ -48,86 +58,206 @@ alg::z_alg_sol_filhos(...)
         return;
     } ;
     zo_cr=msg[0];
+
     if ( zo_cr.type == "P" ) {
         if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Ticket %s eh problema, saindo...", zs_metodo,  zo_cr.ref_num ); } ;
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;        
+    } ;
+    
+    send_wait (0, top_object(), "call_attr", "alg", "dob_by_persid", NULL, zs_alg_persid);
+    if ( msg_error() ) {
+        logf(ERROR, "%s Erro ao instanciar objeto: %s", zs_metodo,  msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    } ;
+    zo_alg=msg[0];
+    send_wait(0, zo_alg, "get_attr_vals", 10, "description", "analyst", "action_desc", "internal", "z_srl_resocode", "system_time", "type", "session", "k_tool", "time_spent" ) ;
+    if ( msg_error() ) {
+        logf(ERROR, "%s ERRO ao retornar atributos da alg: %s", zs_metodo,  msg[0]);
+        z_bloco_fim(zi_depurar, zs_metodo);
+        return;
+    } ;
+    zs_alg_desc = msg[3];
+    zs_alg_analyst = (string) msg[6];
+    zs_alg_action_desc = msg[9];
+    zi_alg_int = (int) msg[12];
+    zi_alg_resocode = (int) msg[15];
+    zd_alg_time = msg[18];
+    zs_alg_type = (string) msg[21];   
+    zs_know_session = (string) msg[24];
+    zi_know_session = (int) msg[24];
+    zs_know_tool = (string) msg[27];
+    zdu_tempo = (duration) msg[30];
+    
+    zs_pai_analyst=(string)zo_cr.assignee;
+    zs_pai_group=(string)zo_cr.group;
+    
+    if ( zs_alg_type == "SOLN" ) {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Definindo Cod. Resolucao do pai", zs_metodo ); } ;
+        zi_pai_resocode=(int)zo_cr.resolution_code;
     } else {
-        send_wait (0, top_object(), "call_attr", "alg", "dob_by_persid", NULL, zs_alg_persid);
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Buscando codigo resolucao no documento de conhecimento", zs_metodo ); } ;
+        zs_persid_kd=format("KD:%s",zs_know_session);
+        send_wait (0, top_object(), "call_attr", "KD", "dob_by_persid", NULL, zs_persid_kd);
         if ( msg_error() ) {
             logf(ERROR, "%s Erro ao instanciar objeto: %s", zs_metodo,  msg[0]);
             z_bloco_fim(zi_depurar, zs_metodo);
             return;
         } ;
-        zo_alg=msg[0];
-        send_wait(0, zo_alg, "get_attr_vals", 7, "description", "analyst", "action_desc", "internal", "z_srl_resocode", "system_time", "type" ) ;
-        if ( msg_error() ) {
-            logf(ERROR, "%s ERRO ao retornar atributos: %s", zs_metodo,  msg[0]);
-            z_bloco_fim(zi_depurar, zs_metodo);
-            return;
-        } ;
-        zs_alg_desc = msg[3];
-        zs_alg_analyst = (string) msg[6];
-        zs_alg_action_desc = msg[9];
-        zi_alg_int = msg[12];
-        zi_alg_resocode = msg[15];
-        zd_alg_time = msg[18];
-        zs_alg_type = msg[21];   
-        
-        zs_wc = format("parent = '%s' and active = 1", zs_persid );
-        send_wait( 0, top_object(), "call_attr", "cr", "sync_fetch",  "STATIC", zs_wc, -1, 0);
-        if ( msg_error() ) {
-            logf(ERROR, "%s Erro ao definir lista de cr's: %s", zs_metodo,  msg[0]);
-            z_bloco_fim(zi_depurar, zs_metodo);
-            return;
-        } ;
-        zo_lista = msg[0] ;
-        zi_lista = (int) msg[1] ;
-        if ( zi_lista > 0 ) {
-            //Cria um group leader
-            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Instanciando GL", zs_metodo ); } ;
-            send_wait(0, top_object(), "get_co_group");
-            if (msg_error()) {
-                logf(ERROR, "%s Erro ao instanciar GL: '%s'", msg[0]);
+        zo_kd=msg[0];
+        zi_id_rootcause=zo_kd.SD_ROOTCAUSE_ID;
+        if (!is_null(zi_id_rootcause)) {
+            zs_persid_rootcause=format("rc:%s",zi_id_rootcause);
+            send_wait (0, top_object(), "call_attr", "rc", "dob_by_persid", NULL, zs_persid_rootcause);
+            if ( msg_error() ) {
+                logf(ERROR, "%s Erro ao instanciar objeto: %s", zs_metodo,  msg[0]);
                 z_bloco_fim(zi_depurar, zs_metodo);
                 return;
-            }
-            zo_groupLeader = msg[0];
-            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s %d incidentes filhos, iterando...", zs_metodo,  zi_lista); } ;
-            for ( zi_index = 0 ; zi_index < zi_lista; zi_index ++) { //Itera pelos items da zi_lista
-                send_wait( 0, zo_lista, "dob_by_index", "DEFAULT", zi_index, zi_index);
+            } ;
+            zo_rc=msg[0];
+            zi_resocode_doc=zo_rc.z_srl_resocode;
+            if (!is_null(zi_resocode_doc)) {
+                zi_pai_resocode=zi_resocode_doc;
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro pai", zs_metodo ); } ;	
+                send_wait(0, zo_groupLeader, "checkout", zo_cr); 
                 if ( msg_error() ) {
-                    logf(ERROR, "%s Erro ao identificar Grupo: %s", zs_metodo,  msg[0]);
-                    z_bloco_fim(zi_depurar, zs_metodo);
-                    return;
+                    sleep(3);
+                    send_wait(0, zo_groupLeader, "checkout", zo_cr);
+                    if ( msg_error() ) {
+                        sleep(5);
+                        send_wait(0, zo_groupLeader, "checkout", zo_cr);                                
+                        if ( msg_error() ) {
+                            logf(ERROR, "%s Erro ao lockar pai %s: '%s'", zs_metodo, zo_item.ref_num, msg[0]);
+                            z_bloco_fim(zi_depurar, zs_metodo);                
+                            return;
+                        } ;
+                    } ;
                 } ;
-                zo_item = msg[0];
-                send_wait( 0, top_object(), "call_attr", "alg", "get_new_dob", NULL, NULL, zo_groupLeader);
-                if (msg_error()) {
-                    logf(ERROR, "%s Erro ao criar alg: '%s'", zs_metodo, msg[0]);
-                    return;
-                }
-                zo_nova_alg = msg[0];
-                zo_nova_alg.call_req_id=zo_item.persistent_id;
-                zo_nova_alg.type=zs_alg_type;
-                zo_nova_alg.description=zs_alg_desc;
-                zo_nova_alg.analyst=zs_alg_analyst;
-                zo_nova_alg.action_desc=format("%s a partir do ticket número %s",zs_alg_action_desc, zo_cr.ref_num);
-                zo_nova_alg.system_time=zd_alg_time;
-                zo_nova_alg.z_srl_resocode=zi_alg_resocode;
-                zo_nova_alg.internal=zi_alg_int;
-                send_wait(0, zo_groupLeader, "checkin"); 
-                if ( msg_error() ) {
-                    logf(ERROR, "%s Erro ao persistir alg: %s", zs_metodo, msg[0]);
-                    z_bloco_fim(zi_depurar, zs_metodo);
-                    return;
-                } ;
-            } ; //Fim do for que Itera pelos items da zi_lista
-            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Objetos persistidos com sucesso a partir do pai %s", zs_metodo, zo_cr.ref_num ); } ;
+                send_wait(0, zo_cr, "call_attr", "resolution_code", "set_val", zi_pai_resocode, "SURE_SET");
+                zi_alterou=1;
+            } else {
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Casa raiz definida no documento sem codigo de resolucao", zs_metodo ); } ;
+            } ;
         } else {
-            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nao ha incidentes filhos no ticket %s", zs_metodo,  zo_cr.ref_num); } ;
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Documento sem causa raiz", zs_metodo ); } ;
         } ;
     } ;
+    zs_wc = format("parent = '%s' and active = 1", zs_persid );
+    send_wait( 0, top_object(), "call_attr", "cr", "sync_fetch",  "STATIC", zs_wc, -1, 0);
+    if ( msg_error() ) {
+       logf(ERROR, "%s Erro ao definir lista de cr's: %s", zs_metodo,  msg[0]);
+       z_bloco_fim(zi_depurar, zs_metodo);
+       return;
+    } ;
+    zo_lista = msg[0] ;
+    zi_lista = (int) msg[1] ;
+    if ( zi_lista > 0 ) {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s %d incidentes filhos, iterando...", zs_metodo,  zi_lista); } ;
+        for ( zi_index = 0 ; zi_index < zi_lista; zi_index ++) { //Itera pelos items da zi_lista
+            send_wait( 0, zo_lista, "dob_by_index", "DEFAULT", zi_index, zi_index);
+            if ( msg_error() ) {
+                logf(ERROR, "%s Erro ao identificar Grupo: %s", zs_metodo,  msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);
+                return;
+            } ;
+            zo_item = msg[0];
+            zs_item_analyst=(string) zo_item.assignee;
+            zs_item_grupo=(string) zo_item.group;
+            zi_item_resocode=(int) zo_item.resolution_code;
+            if (zs_item_analyst == zs_pai_analyst && zs_item_grupo == zs_pai_group && zi_item_resocode == zi_pai_resocode) {
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nao eh preciso alterar resp, grp e resocode do ticket %s", zs_metodo,  zo_item.ref_num); } ;
+            } else {
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s alterando resp, grp ou resocode do ticket %s", zs_metodo,  zo_item.ref_num); } ;
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro", zs_metodo ); } ;	
+                send_wait(0, zo_groupLeader, "checkout", zo_item); 
+                if ( msg_error() ) {
+                    sleep(3);
+                    send_wait(0, zo_groupLeader, "checkout", zo_item);
+                    if ( msg_error() ) {
+                        sleep(5);
+                        send_wait(0, zo_groupLeader, "checkout", zo_item);                                
+                        if ( msg_error() ) {
+                            logf(ERROR, "%s Erro ao lockar filho %s: '%s'", zs_metodo, zo_item.ref_num, msg[0]);
+                            z_bloco_fim(zi_depurar, zs_metodo);                
+                            return;
+                        } ;
+                    } ;
+                } ;
+                send_wait(0, zo_item, "call_attr", "assignee", "set_val", zs_pai_analyst, "SURE_SET");
+                send_wait(0, zo_item, "call_attr", "group", "set_val", zs_pai_group, "SURE_SET");
+                send_wait(0, zo_item, "call_attr", "resolution_code", "set_val", zi_pai_resocode, "SURE_SET");
+                zi_alterou=1;
+            }                                
+            send_wait( 0, top_object(), "call_attr", "alg", "get_new_dob", NULL, NULL, zo_groupLeader);
+            if (msg_error()) {
+                logf(ERROR, "%s Erro ao criar alg: '%s'", zs_metodo, msg[0]);
+                return;
+            }
+            zo_nova_alg = msg[0];
+            zo_nova_alg.call_req_id=zo_item.persistent_id;
+            zo_nova_alg.type=zs_alg_type;
+            zo_nova_alg.description=zs_alg_desc;
+            zo_nova_alg.analyst=zs_alg_analyst;
+            zo_nova_alg.action_desc=format("%s a partir do ticket número %s",zs_alg_action_desc, zo_cr.ref_num);
+            zo_nova_alg.system_time=zd_alg_time;
+            zo_nova_alg.z_srl_resocode=zi_alg_resocode;
+            zo_nova_alg.internal=zi_alg_int;
+            zo_nova_alg.session=zs_know_session;        
+            zo_nova_alg.k_tool=zs_know_tool;
+            zo_nova_alg.time_spent=zdu_tempo;
+            zi_alterou=1;
+                
+            if ( zs_alg_type == "KTSOLN" ) {
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Criando kdlinks para o ticket %s", zs_metodo, zo_item.ref_num ); } ;
+                zs_wc_kd = format("cr='%s' and kd=%s",zs_persid, zi_know_session );
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lista de kdlinks: %s", zs_metodo,  zs_wc_kd); } ;        
+                send_wait( 0, top_object(), "call_attr", "kdlinks", "sync_fetch",  "STATIC", zs_wc_kd, -1, 0);
+                if ( msg_error() ) {
+                    logf(ERROR, "%s Erro ao definir lista de kdlinks's: %s", zs_metodo,  msg[0]);
+                    z_bloco_fim(zi_depurar, zs_metodo);
+                    return;
+                } ;
+                zo_lista_kd = msg[0] ;
+                zi_lista_kd = (int) msg[1] ;   
+                send_wait( 0, zo_lista_kd, "dob_by_index", "DEFAULT", 0, 0);
+                if ( msg_error() ) {
+                    logf(ERROR, "%s Erro ao identificar kdlink: %s", zs_metodo,  msg[0]);
+                    z_bloco_fim(zi_depurar, zs_metodo);
+                    return;
+                } ;
+                zo_item_kd=msg[0];
+                send_wait( 0, top_object(), "call_attr", "kdlinks", "get_new_dob", NULL, NULL, zo_groupLeader);
+                if (msg_error()) {
+                    logf(ERROR, "%s Erro ao criar kdlinks: '%s'", zs_metodo, msg[0]);
+                    return;
+                }
+                zo_novo_kdlink=msg[0];
+                zo_novo_kdlink.kd=zo_item_kd.kd;
+                zo_novo_kdlink.sd_obj_id=zo_item.id;
+                zo_novo_kdlink.cr=zo_item.persistent_id;
+                zo_novo_kdlink.link_type=zo_item_kd.link_type;
+                zo_novo_kdlink.sd_obj_type=zo_item_kd.sd_obj_type;
+                zi_alterou=1;
+            } else {
+                if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nao eh necessario criar kdlinks para o ticket %s", zs_metodo, zo_item.ref_num ); } ;
+            } ;
+        } ; //Fim do for que Itera pelos items da zi_lista
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Objetos persistidos com sucesso a partir do pai %s", zs_metodo, zo_cr.ref_num ); } ;
+    } else {
+        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Nao ha incidentes filhos no ticket %s", zs_metodo,  zo_cr.ref_num); } ;
+    } ;
+    if ( zi_alterou==1 ) {
+        send_wait(0, zo_groupLeader, "checkin"); 
+        if ( msg_error() ) {
+            logf(ERROR, "%s Erro ao persistir tudo: %s", zs_metodo, msg[0]);
+            z_bloco_fim(zi_depurar, zs_metodo);
+            return;
+        } ;
+    } ;
+    
     // Fim do codigo
     ///////////////////////////////////////////////////////////////////////////////////////
 	z_bloco_fim(zi_depurar, zs_metodo);
-
 } ;
+

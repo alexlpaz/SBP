@@ -89,6 +89,7 @@ function unloadActions()
 <PDM_MACRO name=startNotebook hdr="org_tabs">
 <PDM_MACRO name=TAB title="Endereço" file="org_address_tab.htmpl">
 <PDM_MACRO name=TAB title="Ambiente" height=300 id=org_env src="OP=SEARCH+FACTORY=nr+QBE.EQ.orgref.org.id=$dob.id+QBE.EQ.delete_flag=0+KEEP.forOrgtoNr=1+KEEP.ORG_ID=$args.id+KEEP.noCreateBtn=1">
+<PDM_MACRO name=TAB title="Categorias" file="z_isscat_tab.htmpl">
 <PDM_MACRO name=endNotebook>
 <PDM_MACRO name=dtlEnd>
 

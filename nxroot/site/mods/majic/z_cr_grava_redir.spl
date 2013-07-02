@@ -5,7 +5,7 @@
 // Use Case:    Spec "Processos de Gerenciamento de Incidentes (GINC) e Cumprimento de Requisições (CREQ)" - UC 3.1.3.3
 // Modified by: 
 // Modified:
-// Description: Incrementa o controle no ticket ao redirecionar para outro grupo
+// Description: Incrementa o controle no ticket ao redirecionar para outro grupo 
 ////////////////////////////////////////////////////////////////////////
 cr::z_cr_grava_redir(...)
 {
@@ -54,7 +54,7 @@ cr::z_cr_grava_redir(...)
     if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Instanciando GL", zs_metodo ); } ;
     send_wait(0, top_object(), "get_co_group");
     if (msg_error()) {
-        logf(ERROR, "%s Erro ao instanciar GL: '%s'", msg[0]);
+        logf(ERROR, "%s Erro ao instanciar GL: '%s'", zs_metodo, msg[0]);
         z_bloco_fim(zi_depurar, zs_metodo);
         return;
     }
@@ -62,9 +62,17 @@ cr::z_cr_grava_redir(...)
     if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Lockando registro", zs_metodo ); } ;	
     send_wait(0, zo_groupLeader, "checkout", zo_cr); 
     if ( msg_error() ) {
-    	logf(ERROR, "%s Erro ao bloquer ticket %s: '%s'", zo_cr.ref_num, msg[0]);
-        z_bloco_fim(zi_depurar, zs_metodo);                
-        return;
+    	sleep(3);
+    	send_wait(0, zo_groupLeader, "checkout", zo_cr);
+        if ( msg_error() ) {
+            sleep(5);
+            send_wait(0, zo_groupLeader, "checkout", zo_cr);
+            if ( msg_error() ) {
+                logf(ERROR, "%s Erro ao bloquer ticket %s: '%s'", zs_metodo ,zo_cr.ref_num, msg[0]);
+                z_bloco_fim(zi_depurar, zs_metodo);                
+                return;
+            } ;
+        } ;            
     } ;
     send_wait(0, zo_cr, "call_attr", "z_int_num_redir", "set_val", zi_qtd_redir, "SURE_SET");
     if ( msg_error() ) {
