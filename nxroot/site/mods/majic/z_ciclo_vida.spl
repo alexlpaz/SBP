@@ -41,7 +41,7 @@ cr::z_inicio_ciclo_vida(...){
         send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, z_incidente);
   	if ( msg_error() ) {
   		logf(ERROR, "%s Erro ao instanciar cr: %s", zs_metodo, msg[0]);
-  		bloco_fim(depurar, zs_metodo);
+  		z_bloco_fim(zi_depurar, zs_metodo);
   		return;
   	} ;
   	cr = msg[0] ;
@@ -58,7 +58,7 @@ cr::z_inicio_ciclo_vida(...){
             send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, z_incidente);
   	if ( msg_error() ) {
   		logf(ERROR, "%s Erro ao instanciar cr: %s", zs_metodo, msg[0]);
-  		bloco_fim(depurar, zs_metodo);
+  		z_bloco_fim(zi_depurar, zs_metodo);
   		return;
   	} ;
   	cr = msg[0] ;
@@ -118,7 +118,7 @@ cr::z_encerra_ciclo_vida(...){
     send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, z_incidente);
   	if ( msg_error() ) {
   		logf(ERROR, "%s Erro ao instanciar cr: %s", zs_metodo, msg[0]);
-  		bloco_fim(depurar, zs_metodo);
+  		z_bloco_fim(zi_depurar, zs_metodo);
   		return;
   	} ;
   	cr = msg[0] ;
@@ -182,7 +182,7 @@ cr::z_transfere_ciclo_vida(...){
     send_wait (0, top_object(), "call_attr", "cr", "dob_by_persid", NULL, z_incidente);
   	if ( msg_error() ) {
   		logf(ERROR, "%s Erro ao instanciar cr: %s", zs_metodo, msg[0]);
-  		bloco_fim(depurar, zs_metodo);
+  		z_bloco_fim(zi_depurar, zs_metodo);
   		return;
   	} ;
   	cr = msg[0] ;
@@ -224,22 +224,26 @@ z_cria_novo_ciclo_vida(string incidente,uuid grupo,string status, int tempo_tot,
     object grp;
     string grp_persid, zs_work_grp;
     
+    if(!is_empty(grupo)) {
+        grp_persid  = format("cnt:%s",grupo );
     
-    grp_persid  = format("cnt:%s",grupo );
-
-    send_wait (0, top_object(), "call_attr", "cnt", "dob_by_persid", NULL, grp_persid);
-  	if ( msg_error() ) {
-  		logf(ERROR, "%s Erro ao instanciar cnt: %s", zs_metodo, msg[0]);
-  		bloco_fim(depurar, zs_metodo);
-  		return;
-  	} ;
-  	grp = msg[0] ;
-    zs_work_grp = grp.schedule;
-    if(is_null(zs_work_grp)){
-        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s entrou aqui???????", zs_metodo ); } ;	
-              zs_work_grp = 'wrkshft:4600';    
-    }        
-
+        send_wait (0, top_object(), "call_attr", "cnt", "dob_by_persid", NULL, grp_persid);
+      	if ( msg_error() ) {
+      		logf(ERROR, "%s Erro ao instanciar cnt: %s", zs_metodo, msg[0]);
+      		z_bloco_fim(zi_depurar, zs_metodo);
+      		return;
+      	} ;
+      	grp = msg[0] ;
+        zs_work_grp = grp.schedule;
+        if(is_null(zs_work_grp)){
+            if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s entrou aqui???????", zs_metodo ); } ;	
+                  zs_work_grp = 'wrkshft:4600';    
+        }        
+    }
+    else {
+        grp_persid = "";
+        zs_work_grp = "";
+    }
         string zs_wc2;
         object zo_list2;
         int zi_num2;
