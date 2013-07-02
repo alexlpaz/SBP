@@ -46,11 +46,38 @@ var zoutput;
 var zcontrol=1;
 var zgrp = 0;
 var zstatus;
+var zgrpid;
+var zorgid;
+var zcntid;
+var zuser = "$cst.id";
+var zuserorg = "$cst.organization.id";
+var ztypeapp;
+var zpermissao;
+var zusergrp;
+
 zoutput="<table  class='tab' ><th scope='col' align='left' class='results'>Sequência</th><th scope='col' align='left' class='results'>Status</th>";
 zoutput+="<th scope='col' align='left' class='results'>ContatoAprovador</th><th scope='col' align='left' class='results'>Grupo Aprovador</th>";
 zoutput+="<th scope='col' align='left' class='results'>Organização Aprovadora</th>";
 
 <PDM_LIST PREFIX=list WHERE="cr='$args.KEEP.cr'" FACTORY="zpasso">
+    zpermissao = 0;
+    zusergrp = 0;
+    zgrpid = "$list.grpapprover.id";
+    zorgid = "$list.orgapprover.id";
+    zcntid = "$list.approver.id";
+    ztypeapp = "$list.tipoaprovador.sym";
+<pdm_if "$list.tipoaprovador.sym" == "Grupo">
+<PDM_LIST FACTORY=grpmem WHERE="member=U'$cst.id' and group = U'$list.grpapprover.id'" PREFIX=list2 ESC_STYLE=C>
+  // $list2.id
+  zusergrp=1;
+</PDM_LIST>
+</pdm_if>
+    
+    if(ztypeapp == "Contato" && "$list.approver.id" == zuser ) zpermissao = 1;
+    else if(ztypeapp == "Contato de Objeto" && "$list.approver.id" == zuser) zpermissao = 1;
+    else if(ztypeapp == "Grupo" && zusergrp == 1) zpermissao = 1;
+    else if(ztypeapp == "Organização" && "$list.orgapprover.id" == zuserorg) zpermissao = 1;
+    
 	if(zline%2) {
 		sClass = "results1";
 	} else {
@@ -59,7 +86,8 @@ zoutput+="<th scope='col' align='left' class='results'>Organização Aprovadora<
 zoutput+="<tr class='" + sClass +  "'><td valign='top' class='detailroTab'>";
 if("$list.status" == "AWP" && (zcontrol==1 || (zgrp == 1 && "$list.grpstep"==1))) {
     zcontrol = 0;
-    zoutput+="<a class='detailroTab' href=\"javascript:showDetailWithPersid('zpasso:$list.id')\">$list.sequence</a>";
+    if(zpermissao == 1) zoutput+="<a class='detailroTab' href=\"javascript:showDetailWithPersid('zpasso:$list.id')\">$list.sequence</a>";
+    else zoutput+="$list.sequence";
     
     if("$list.grpstep" == "1") zgrp = 1;
 } 

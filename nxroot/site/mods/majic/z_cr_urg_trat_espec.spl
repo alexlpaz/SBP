@@ -28,7 +28,7 @@ cr::z_cr_urg_trat_espec(...)
 	zs_metodo = 'z_cr_urg_trat_espec - ';
 
     // Alterar valor zi_depurar parar 1 para debug mode
-    zi_depurar = 1;
+    zi_depurar = 0;
         
     // Entrada para debug mode
     if ( zi_depurar==1 ) { 

@@ -21,7 +21,7 @@ cr::z_cr_associa_app(...)
 	zs_metodo = 'z_cr_associa_app - ';
 
     // Alterar valor zi_depurar parar 1 para debug mode
-    zi_depurar = 1;
+    zi_depurar = 0;
         
     // Entrada para debug mode
     if ( zi_depurar==1 ) { 
@@ -238,6 +238,19 @@ cr::z_cr_associa_app(...)
                     zs_valor = (string) zo_modpasso.sequence;
                     if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo valor: '%s' no campo '%s'", zs_metodo, zs_valor, zs_campo ); } ;
                     send_wait(0, zo_passo, "call_attr", zs_campo, "set_val", zo_modpasso.sequence, "SURE_SET");
+                    if ( msg_error() ) {
+                        logf(ERROR, "%s ERRO ao persistir valor: %s", zs_metodo,  msg[0]);
+                        z_bloco_fim(zi_depurar, zs_metodo);
+                        return;
+                    } else {
+                        if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Valor persistido com sucesso", zs_metodo ); } ;
+                    } ;
+                    
+                    //Define o valor zs_valor no campo zs_campo do objeto 
+                    zs_campo = "tipoaprovador";
+                    zs_valor = (string) zo_modpasso.tipoaprovador;
+                    if ( zi_depurar==1 ) { logf(SIGNIFICANT, "%s Persistindo valor: '%s' no campo '%s'", zs_metodo, zs_valor, zs_campo ); } ;
+                    send_wait(0, zo_passo, "call_attr", zs_campo, "set_val", zo_modpasso.tipoaprovador, "SURE_SET");
                     if ( msg_error() ) {
                         logf(ERROR, "%s ERRO ao persistir valor: %s", zs_metodo,  msg[0]);
                         z_bloco_fim(zi_depurar, zs_metodo);

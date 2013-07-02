@@ -10,7 +10,7 @@ cr::z_inicio_ciclo_vida(...){
     zs_metodo = 'z_inicio_ciclo_vida - ';
 
     // Alterar valor zi_depurar parar 1 para debug mode
-    zi_depurar = 1;
+    zi_depurar = 0;
     
     logf(SIGNIFICANT, "%s Inicio - %s", zs_metodo, now());
     // Entrada para debug mode
@@ -87,7 +87,7 @@ cr::z_encerra_ciclo_vida(...){
     	zs_metodo = 'z_encerra_ciclo_vida - ';
     
         // Alterar valor zi_depurar parar 1 para debug mode
-        zi_depurar = 1;
+        zi_depurar = 0;
             
         // Entrada para debug mode
         if ( zi_depurar==1 ) { 
@@ -149,7 +149,7 @@ cr::z_transfere_ciclo_vida(...){
     	zs_metodo = 'z_transfere_ciclo_vida - ';
     
         // Alterar valor zi_depurar parar 1 para debug mode
-        zi_depurar = 1;
+        zi_depurar = 0;
             
         // Entrada para debug mode
         if ( zi_depurar==1 ) { 
@@ -217,7 +217,7 @@ z_cria_novo_ciclo_vida(string incidente,uuid grupo,string status, int tempo_tot,
     zs_metodo = 'z_cria_novo_ciclo_vida - ';
 
     // Alterar valor zi_depurar parar 1 para debug mode
-    zi_depurar = 1;    
+    zi_depurar = 0;    
     ///////////////////////////////////////////////////////////////////////////////////////
     // Inicio do codigo
 
@@ -430,7 +430,7 @@ z_atualiza_ultimo_ciclo_vida(string incidente,uuid responsavel,string status,str
     	zs_metodo = 'z_atualiza_ultimo_ciclo_vida - ';
     
         // Alterar valor zi_depurar parar 1 para debug mode
-        zi_depurar = 1;
+        zi_depurar = 0;
             
         ///////////////////////////////////////////////////////////////////////////////////////
         // Inicio do codigo
